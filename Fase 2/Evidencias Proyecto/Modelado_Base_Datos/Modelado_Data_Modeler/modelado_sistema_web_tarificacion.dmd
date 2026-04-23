@@ -1,0 +1,8 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<OSDM_Design class="oracle.dbtools.crest.model.design.Design" name="modelado_sistema_web_tarificacion" id="915BB536-BAD1-72D0-FEAC-DC45FEF9AC10" version="3.5">
+<createdBy>h8_hate machine</createdBy>
+<createdTime>2026-04-23 01:53:05 UTC</createdTime>
+<ownerDesignName>modelado_sistema_web_tarificacion</ownerDesignName>
+<capitalNames>false</capitalNames>
+<designId>915BB536-BAD1-72D0-FEAC-DC45FEF9AC10</designId>
+</OSDM_Design>
