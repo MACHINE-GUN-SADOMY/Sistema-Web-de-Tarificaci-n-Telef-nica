@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourcePerFileMappings">
-    <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/8dd5e4c7-7da2-45bf-9873-c4a86e092c8d/console.sql" value="8dd5e4c7-7da2-45bf-9873-c4a86e092c8d" />
-    <file url="file://$PROJECT_DIR$/script_create_table.sql" value="8dd5e4c7-7da2-45bf-9873-c4a86e092c8d" />
+    <file url="file://$PROJECT_DIR$/funciones.sql" value="10073e7a-7ee0-4469-9957-79889bdc1fd7" />
+    <file url="file://$PROJECT_DIR$/pobla_tablas_para_probar.sql" value="10073e7a-7ee0-4469-9957-79889bdc1fd7" />
+    <file url="file://$PROJECT_DIR$/script_create_table.sql" value="10073e7a-7ee0-4469-9957-79889bdc1fd7" />
   </component>
 </project>
