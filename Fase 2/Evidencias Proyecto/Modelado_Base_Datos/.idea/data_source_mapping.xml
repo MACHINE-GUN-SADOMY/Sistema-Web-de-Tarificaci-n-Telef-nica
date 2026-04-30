@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourcePerFileMappings">
+    <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/10073e7a-7ee0-4469-9957-79889bdc1fd7/console.sql" value="10073e7a-7ee0-4469-9957-79889bdc1fd7" />
     <file url="file://$PROJECT_DIR$/funciones.sql" value="10073e7a-7ee0-4469-9957-79889bdc1fd7" />
+    <file url="file://$PROJECT_DIR$/funciones_completas.sql" value="10073e7a-7ee0-4469-9957-79889bdc1fd7" />
+    <file url="file://$PROJECT_DIR$/pkg_terminado.sql" value="10073e7a-7ee0-4469-9957-79889bdc1fd7" />
     <file url="file://$PROJECT_DIR$/pobla_tablas_para_probar.sql" value="10073e7a-7ee0-4469-9957-79889bdc1fd7" />
+    <file url="file://$PROJECT_DIR$/procedimientos.sql" value="10073e7a-7ee0-4469-9957-79889bdc1fd7" />
     <file url="file://$PROJECT_DIR$/script_create_table.sql" value="10073e7a-7ee0-4469-9957-79889bdc1fd7" />
+    <file url="file://$PROJECT_DIR$/secuencias_completa.sql" value="10073e7a-7ee0-4469-9957-79889bdc1fd7" />
+    <file url="file://$PROJECT_DIR$/triggers.sql" value="10073e7a-7ee0-4469-9957-79889bdc1fd7" />
   </component>
 </project>

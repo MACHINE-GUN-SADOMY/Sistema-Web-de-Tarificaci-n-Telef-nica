@@ -78,6 +78,19 @@ CREATE TABLE reporte_tarificacion (
 );
 ALTER TABLE reporte_tarificacion ADD CONSTRAINT pk_reporte_tarificacion PRIMARY KEY (id_reporte_tarificacion);
 
+CREATE TABLE error_proceso (
+    id_error                        NUMBER(10) NOT NULL,
+    modulo_origen                   VARCHAR2(100) NOT NULL,
+    procedimiento_origen            VARCHAR2(100) NOT NULL,
+    mensaje_error                   VARCHAR2(255) NOT NULL,
+    fecha_error                     DATE NOT NULL,
+    id_usuario                      NUMBER(10) NOT NULL,
+    id_carga                        NUMBER(10) NOT NULL,
+    id_registro_llamada             NUMBER(10) NULL,
+    detalle_error                   VARCHAR2(255) NOT NULL
+);
+ALTER TABLE error_proceso ADD CONSTRAINT pk_error_proceso PRIMARY KEY (id_error);
+
 -- CREACION DE FK
 ALTER TABLE usuario ADD CONSTRAINT fk_usuario_rol FOREIGN KEY (id_rol) REFERENCES rol (id_rol);
 
