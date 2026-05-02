@@ -31,3 +31,13 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Agents and Rules ###
+AGENTS.md
+AGENT.md
+agents/
+.agents/
+.agent/
+.antigravity/
+rules/
+*.rules.md
