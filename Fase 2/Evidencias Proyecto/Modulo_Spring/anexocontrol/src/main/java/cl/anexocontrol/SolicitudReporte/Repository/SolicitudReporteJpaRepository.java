@@ -1,4 +1,4 @@
-package cl.anexocontrol.SolicitudReporte.repository;
+package cl.anexocontrol.SolicitudReporte.Repository;
 
 import cl.anexocontrol.SolicitudReporte.Repository.Jpa.SolicitudReporteJpa;
 import org.springframework.data.jpa.repository.JpaRepository;

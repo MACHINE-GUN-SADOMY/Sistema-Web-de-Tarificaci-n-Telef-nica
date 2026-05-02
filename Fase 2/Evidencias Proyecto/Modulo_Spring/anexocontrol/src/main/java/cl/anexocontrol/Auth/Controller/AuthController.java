@@ -1,4 +1,4 @@
-package cl.anexocontrol.Auth.controller;
+package cl.anexocontrol.Auth.Controller;
 
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;

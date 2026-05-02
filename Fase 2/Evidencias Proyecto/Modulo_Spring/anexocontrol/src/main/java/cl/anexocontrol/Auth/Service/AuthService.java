@@ -1,4 +1,4 @@
-package cl.anexocontrol.Auth.service;
+package cl.anexocontrol.Auth.Service;
 
 import org.springframework.stereotype.Service;
 

@@ -1,4 +1,4 @@
-package cl.anexocontrol.SolicitudReporte.service;
+package cl.anexocontrol.SolicitudReporte.Service;
 
 import org.springframework.stereotype.Service;
 

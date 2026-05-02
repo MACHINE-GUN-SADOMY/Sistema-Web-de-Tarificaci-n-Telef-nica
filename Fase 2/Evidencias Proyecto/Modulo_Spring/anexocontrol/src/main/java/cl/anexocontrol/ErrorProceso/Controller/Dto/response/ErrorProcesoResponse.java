@@ -1,4 +1,4 @@
-package cl.anexocontrol.ErrorProceso.dto.response;
+package cl.anexocontrol.ErrorProceso.Controller.Dto.Response;
 
 import lombok.Getter;
 import lombok.Setter;

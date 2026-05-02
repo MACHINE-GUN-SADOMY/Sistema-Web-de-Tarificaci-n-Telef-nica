@@ -1,4 +1,4 @@
-package cl.anexocontrol.ReporteTarificacion.dto.response;
+package cl.anexocontrol.ReporteTarificacion.Controller.Dto.Response;
 
 import lombok.Getter;
 import lombok.Setter;

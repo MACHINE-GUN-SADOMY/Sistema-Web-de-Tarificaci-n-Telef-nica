@@ -1,4 +1,4 @@
-package cl.anexocontrol.Archivo.service;
+package cl.anexocontrol.Archivo.Service;
 
 import org.springframework.stereotype.Service;
 

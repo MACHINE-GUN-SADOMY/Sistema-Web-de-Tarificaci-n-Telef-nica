@@ -1,4 +1,4 @@
-package cl.anexocontrol.RegistroLlamada.controller;
+package cl.anexocontrol.RegistroLlamada.Controller;
 
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;

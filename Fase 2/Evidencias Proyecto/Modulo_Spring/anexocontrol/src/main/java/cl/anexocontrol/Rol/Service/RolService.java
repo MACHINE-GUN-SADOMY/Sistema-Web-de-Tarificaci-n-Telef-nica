@@ -1,4 +1,4 @@
-package cl.anexocontrol.Rol.service;
+package cl.anexocontrol.Rol.Service;
 
 import org.springframework.stereotype.Service;
 

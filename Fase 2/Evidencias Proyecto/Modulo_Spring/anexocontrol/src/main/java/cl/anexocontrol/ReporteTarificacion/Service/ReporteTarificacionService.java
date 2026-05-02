@@ -1,4 +1,4 @@
-package cl.anexocontrol.ReporteTarificacion.service;
+package cl.anexocontrol.ReporteTarificacion.Service;
 
 import org.springframework.stereotype.Service;
 

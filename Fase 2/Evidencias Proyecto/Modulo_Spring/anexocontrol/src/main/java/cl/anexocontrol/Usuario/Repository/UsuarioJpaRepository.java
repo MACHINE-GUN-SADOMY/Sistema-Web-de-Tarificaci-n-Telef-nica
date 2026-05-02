@@ -1,4 +1,4 @@
-package cl.anexocontrol.Usuario.repository;
+package cl.anexocontrol.Usuario.Repository;
 
 import cl.anexocontrol.Usuario.Repository.Jpa.UsuarioJpa;
 import org.springframework.data.jpa.repository.JpaRepository;

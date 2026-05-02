@@ -1,4 +1,4 @@
-package cl.anexocontrol.Usuario.dto.response;
+package cl.anexocontrol.Usuario.Controller.Dto.Response;
 
 import lombok.Getter;
 import lombok.Setter;

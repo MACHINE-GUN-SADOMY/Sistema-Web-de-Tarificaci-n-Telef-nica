@@ -1,4 +1,4 @@
-package cl.anexocontrol.SolicitudReporte.dto.response;
+package cl.anexocontrol.SolicitudReporte.Controller.Dto.Response;
 
 import lombok.Getter;
 import lombok.Setter;

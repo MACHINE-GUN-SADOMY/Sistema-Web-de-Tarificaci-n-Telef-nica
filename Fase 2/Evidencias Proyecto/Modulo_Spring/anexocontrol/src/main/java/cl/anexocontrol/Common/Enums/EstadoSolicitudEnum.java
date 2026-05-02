@@ -1,4 +1,4 @@
-package cl.anexocontrol.Common.enums;
+package cl.anexocontrol.Common.Enums;
 
 public enum EstadoSolicitudEnum {
     PENDIENTE,

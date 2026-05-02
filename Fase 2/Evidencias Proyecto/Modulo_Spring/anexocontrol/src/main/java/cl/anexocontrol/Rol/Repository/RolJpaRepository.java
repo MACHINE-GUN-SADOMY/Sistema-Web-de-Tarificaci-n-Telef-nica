@@ -1,4 +1,4 @@
-package cl.anexocontrol.Rol.repository;
+package cl.anexocontrol.Rol.Repository;
 
 import cl.anexocontrol.Rol.Repository.Jpa.RolJpa;
 import org.springframework.data.jpa.repository.JpaRepository;

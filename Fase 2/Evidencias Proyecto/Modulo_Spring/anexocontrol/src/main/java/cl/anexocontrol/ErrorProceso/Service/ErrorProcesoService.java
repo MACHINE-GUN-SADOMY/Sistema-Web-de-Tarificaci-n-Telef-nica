@@ -1,4 +1,4 @@
-package cl.anexocontrol.ErrorProceso.service;
+package cl.anexocontrol.ErrorProceso.Service;
 
 import org.springframework.stereotype.Service;
 

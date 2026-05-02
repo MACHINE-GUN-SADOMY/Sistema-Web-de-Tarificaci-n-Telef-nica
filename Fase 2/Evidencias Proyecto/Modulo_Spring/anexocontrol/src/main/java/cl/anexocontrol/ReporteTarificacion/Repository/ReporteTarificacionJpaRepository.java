@@ -1,4 +1,4 @@
-package cl.anexocontrol.ReporteTarificacion.repository;
+package cl.anexocontrol.ReporteTarificacion.Repository;
 
 import cl.anexocontrol.ReporteTarificacion.Repository.Jpa.ReporteTarificacionJpa;
 import org.springframework.data.jpa.repository.JpaRepository;

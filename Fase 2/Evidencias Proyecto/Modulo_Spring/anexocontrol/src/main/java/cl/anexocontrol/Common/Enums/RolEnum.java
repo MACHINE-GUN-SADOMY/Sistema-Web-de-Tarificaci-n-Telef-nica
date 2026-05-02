@@ -1,4 +1,4 @@
-package cl.anexocontrol.Common.enums;
+package cl.anexocontrol.Common.Enums;
 
 import lombok.Getter;
 

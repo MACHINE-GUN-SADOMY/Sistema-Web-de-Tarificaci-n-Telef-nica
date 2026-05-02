@@ -1,4 +1,4 @@
-package cl.anexocontrol.RegistroLlamada.service;
+package cl.anexocontrol.RegistroLlamada.Service;
 
 import org.springframework.stereotype.Service;
 

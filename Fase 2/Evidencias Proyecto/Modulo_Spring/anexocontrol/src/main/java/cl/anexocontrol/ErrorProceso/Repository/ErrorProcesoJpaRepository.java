@@ -1,4 +1,4 @@
-package cl.anexocontrol.ErrorProceso.repository;
+package cl.anexocontrol.ErrorProceso.Repository;
 
 import cl.anexocontrol.ErrorProceso.Repository.Jpa.ErrorProcesoJpa;
 import org.springframework.data.jpa.repository.JpaRepository;

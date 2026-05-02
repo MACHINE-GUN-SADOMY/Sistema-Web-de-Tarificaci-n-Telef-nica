@@ -1,4 +1,4 @@
-package cl.anexocontrol.RegistroLlamada.repository;
+package cl.anexocontrol.RegistroLlamada.Repository;
 
 import cl.anexocontrol.RegistroLlamada.Repository.Jpa.RegistroLlamadaJpa;
 import org.springframework.data.jpa.repository.JpaRepository;

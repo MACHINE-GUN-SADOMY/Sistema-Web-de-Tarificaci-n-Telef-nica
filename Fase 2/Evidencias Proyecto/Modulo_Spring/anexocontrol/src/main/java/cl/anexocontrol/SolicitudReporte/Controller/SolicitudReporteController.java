@@ -1,4 +1,4 @@
-package cl.anexocontrol.SolicitudReporte.controller;
+package cl.anexocontrol.SolicitudReporte.Controller;
 
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
