@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface RolJpaRepository extends JpaRepository<RolJpa, Long> {
+    boolean existsByIdRol(Long idRol);
 }

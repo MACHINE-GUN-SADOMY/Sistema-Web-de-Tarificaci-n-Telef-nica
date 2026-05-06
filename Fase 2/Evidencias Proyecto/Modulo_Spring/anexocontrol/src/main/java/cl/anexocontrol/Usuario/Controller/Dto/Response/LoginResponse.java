@@ -1,17 +1,21 @@
-package cl.anexocontrol.Usuario.Controller.Dto.Request;
+package cl.anexocontrol.Usuario.Controller.Dto.Response;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
+@Builder
 @NoArgsConstructor
-public class CrearUsuarioRequest {
+@AllArgsConstructor
+public class LoginResponse {
+    private Long idUsuario;
     private String nombreUsuario;
-    private String contrasenha;
     private String estadoCuenta;
     private Long idRol;
+    private String nombreRol;
+    private String mensaje;
 }

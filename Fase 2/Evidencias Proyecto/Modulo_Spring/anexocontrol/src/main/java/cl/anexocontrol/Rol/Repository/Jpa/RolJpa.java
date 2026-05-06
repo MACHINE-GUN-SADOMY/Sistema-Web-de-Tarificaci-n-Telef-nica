@@ -15,7 +15,6 @@ import lombok.Setter;
 @Getter @Setter 
 @NoArgsConstructor @AllArgsConstructor
 public class RolJpa {
-
     @Id
     @Column(name = "id_rol")
     private Long idRol;

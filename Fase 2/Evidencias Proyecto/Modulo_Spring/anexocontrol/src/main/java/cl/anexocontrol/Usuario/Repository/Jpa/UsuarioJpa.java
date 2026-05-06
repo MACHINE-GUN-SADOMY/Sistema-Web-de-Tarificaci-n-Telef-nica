@@ -17,6 +17,12 @@ import lombok.Setter;
 public class UsuarioJpa {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_usuario")
+    @SequenceGenerator(
+            name = "seq_usuario",
+            sequenceName = "SEQ_USUARIO",
+            allocationSize = 1
+    )
     @Column(name = "id_usuario")
     private Long idUsuario;
 

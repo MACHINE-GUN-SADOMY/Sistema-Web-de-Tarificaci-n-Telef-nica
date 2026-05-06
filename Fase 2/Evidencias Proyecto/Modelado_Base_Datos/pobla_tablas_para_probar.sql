@@ -27,8 +27,12 @@ INSERT INTO usuario (
     estado_cuenta,
     id_rol
 ) VALUES (
-    1, 'admin', 'admin123', 'ACTIVA', 1
-);
+             seq_usuario.NEXTVAL,
+             'admin',
+             'admin123',
+             'ACTIVA',
+             1
+         );
 
 INSERT INTO usuario (
     id_usuario,
@@ -37,8 +41,12 @@ INSERT INTO usuario (
     estado_cuenta,
     id_rol
 ) VALUES (
-    2, 'kristian', 'kristian123', 'ACTIVA', 2
-);
+             seq_usuario.NEXTVAL,
+             'kristian',
+             'kristian123',
+             'ACTIVA',
+             2
+         );
 
 INSERT INTO usuario (
     id_usuario,
@@ -47,8 +55,12 @@ INSERT INTO usuario (
     estado_cuenta,
     id_rol
 ) VALUES (
-    3, 'empleado1', 'empleado123', 'ACTIVA', 2
-);
+             seq_usuario.NEXTVAL,
+             'empleado1',
+             'empleado123',
+             'ACTIVA',
+             2
+         );
 
 -- SOLICITUDES DE REPORTE
 INSERT INTO solicitud_reporte (
