@@ -1,0 +1,203 @@
+{
+	"info": {
+		"name": "Solicitud Reporte API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Crear Solicitud (Sube Archivo)",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "archivo",
+							"type": "file",
+							"src": []
+						},
+						{
+							"key": "idUsuario",
+							"value": "1",
+							"type": "text"
+						},
+						{
+							"key": "idTipoReporte",
+							"value": "1",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:8081/solicitud-reporte/crear-solicitud",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"solicitud-reporte",
+						"crear-solicitud"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "2. Obtener Solicitud por ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/solicitud-reporte/obtener-solicitud/1?idUsuarioSolicitante=1&idRolSolicitante=1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"solicitud-reporte",
+						"obtener-solicitud",
+						"1"
+					],
+					"query": [
+						{
+							"key": "idUsuarioSolicitante",
+							"value": "1"
+						},
+						{
+							"key": "idRolSolicitante",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3. Listar Solicitudes por Usuario",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/solicitud-reporte/listar-solicitud-por-usuario/1?idUsuarioSolicitante=1&idRolSolicitante=1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"solicitud-reporte",
+						"listar-solicitud-por-usuario",
+						"1"
+					],
+					"query": [
+						{
+							"key": "idUsuarioSolicitante",
+							"value": "1"
+						},
+						{
+							"key": "idRolSolicitante",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "4. Listar Solicitudes por Carga",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/solicitud-reporte/listar-solicitud-por-carga/12345?idUsuarioSolicitante=1&idRolSolicitante=1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"solicitud-reporte",
+						"listar-solicitud-por-carga",
+						"12345"
+					],
+					"query": [
+						{
+							"key": "idUsuarioSolicitante",
+							"value": "1"
+						},
+						{
+							"key": "idRolSolicitante",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "5. Actualizar Estado de Solicitud",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"estadoSolicitado\": \"LISTO\",\n  \"rutaReporte\": \"C:/anexocontrol/archivos/procesados/reporte_listo.txt\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8081/solicitud-reporte/actualizar-estado-solicitud/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"solicitud-reporte",
+						"actualizar-estado-solicitud",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "6. Descargar Reporte (Si esta LISTO)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/solicitud-reporte/1/descargar?idUsuarioSolicitante=1&idRolSolicitante=1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"solicitud-reporte",
+						"1",
+						"descargar"
+					],
+					"query": [
+						{
+							"key": "idUsuarioSolicitante",
+							"value": "1"
+						},
+						{
+							"key": "idRolSolicitante",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

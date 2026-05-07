@@ -1,9 +1,6 @@
 package cl.anexocontrol.SolicitudReporte.Repository.Jpa;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,8 +16,9 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SolicitudReporteJpa {
-
     @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_solicitud_reporte")
+    @SequenceGenerator(name = "seq_solicitud_reporte", sequenceName = "SEQ_SOLICITUD_REPORTE", allocationSize = 1)
     @Column(name = "id_solicitud")
     private Long idSolicitud;
 
@@ -30,7 +28,7 @@ public class SolicitudReporteJpa {
     @Column(name = "fecha_solicitud")
     private LocalDateTime fechaSolicitud;
 
-    @Column(name = "estado_solicitado")
+    @Column(name = "estado_solicitud")
     private String estadoSolicitado;
 
     @Column(name = "ruta_reporte")

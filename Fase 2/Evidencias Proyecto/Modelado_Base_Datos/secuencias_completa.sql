@@ -18,3 +18,10 @@ CREATE SEQUENCE seq_usuario
     INCREMENT BY 1
     NOCACHE
     NOCYCLE;
+
+-- 3. secuencia de carga
+CREATE SEQUENCE seq_carga
+    START WITH 1003
+    INCREMENT BY 1
+    NOCACHE
+    NOCYCLE;
