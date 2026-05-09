@@ -7,10 +7,8 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ProcesarArchivoRequest {
+public class ProcesamientoCallbackRequest {
     private Long idSolicitud;
-    private Long idCarga;
-    private Long idUsuario;
-    private String rutaArchivo;
-    private Integer idTipoReporte;
+    private String estadoSolicitado;
+    private String rutaReporte;
 }

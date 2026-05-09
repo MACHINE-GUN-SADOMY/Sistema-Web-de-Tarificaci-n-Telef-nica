@@ -1,7 +1,11 @@
 package cl.anexocontrol.SolicitudReporte.Service;
 
 import cl.anexocontrol.Common.Enums.EstadoSolicitudEnum;
+import cl.anexocontrol.SolicitudReporte.Client.ProcesamientoClient;
 import cl.anexocontrol.SolicitudReporte.Controller.Dto.Request.ActualizarEstadoSolicitudRequest;
+import cl.anexocontrol.SolicitudReporte.Controller.Dto.Request.ProcesamientoCallbackRequest;
+import cl.anexocontrol.SolicitudReporte.Controller.Dto.Request.ProcesarArchivoRequest;
+import cl.anexocontrol.SolicitudReporte.Controller.ProcesamientoCallbackController;
 import cl.anexocontrol.SolicitudReporte.Repository.Jpa.SolicitudReporteJpa;
 import cl.anexocontrol.SolicitudReporte.Repository.SolicitudReporteJpaRepository;
 import org.springframework.stereotype.Service;
@@ -18,35 +22,35 @@ public class SolicitudReporteService {
     private final SolicitudReporteJpaRepository solicitudReporteJpaRepository;
     private final ArchivoService archivoService;
     private final JdbcTemplate jdbcTemplate;
+    private final ProcesamientoClient procesamientoClient;
 
     public SolicitudReporteService(
             SolicitudReporteJpaRepository solicitudReporteJpaRepository, ArchivoService archivoService,
-            JdbcTemplate jdbcTemplate) {
+            JdbcTemplate jdbcTemplate, ProcesamientoClient procesamientoClient) {
         this.solicitudReporteJpaRepository = solicitudReporteJpaRepository;
         this.archivoService = archivoService;
         this.jdbcTemplate = jdbcTemplate;
+        this.procesamientoClient = procesamientoClient;
     }
 
-    // metodo para crear una nueva solicitud en base a un request
-    // metodo para crear una nueva solicitud vinculada a un archivo
+    // metodo para crear una nueva solicitud vinculada a un archivo y notificar al procesamiento
     public SolicitudReporteJpa solicitarReporte(MultipartFile archivo, Long idUsuario, Integer idTipoReporte) {
-        // verificamos que el usuario no sea nulo
+        // validamos que los datos obligatorios esten presentes
         if (idUsuario == null) {
             throw new RuntimeException("El id de usuario es obligatorio");
         }
 
-        // exigimos el tipo de reporte
         if (idTipoReporte == null) {
             throw new RuntimeException("El tipo de reporte es obligatorio");
         }
 
-        // creamos un id unico para la carga
+        // generamos un id unico de carga para el lote de archivos
         Long idCarga = generarIdCarga();
 
-        // le pasamos el archivo al servicio correspondiente
-        archivoService.guardarArchivo(archivo, idCarga);
+        // guardamos el archivo y capturamos la ruta donde quedo almacenado
+        String rutaArchivo = archivoService.guardarArchivo(archivo, idCarga);
 
-        // instanciamos la solicitud y seteamos los datos
+        // preparamos la entidad con el estado inicial en PENDIENTE
         SolicitudReporteJpa solicitud = new SolicitudReporteJpa();
         solicitud.setIdCarga(idCarga);
         solicitud.setFechaSolicitud(LocalDateTime.now());
@@ -55,15 +59,28 @@ public class SolicitudReporteService {
         solicitud.setIdUsuario(idUsuario);
         solicitud.setIdTipoReporte(idTipoReporte);
 
-        // guardamos la nueva solicitud y la retornamos
-        return solicitudReporteJpaRepository.save(solicitud);
+        // guardamos la solicitud para obtener el ID generado por la base de datos
+        SolicitudReporteJpa solicitudGuardada = solicitudReporteJpaRepository.save(solicitud);
+
+        // preparamos el objeto para notificar al modulo de procesamiento Python/Django
+        ProcesarArchivoRequest procesarArchivoRequest = ProcesarArchivoRequest.builder()
+                .idSolicitud(solicitudGuardada.getIdSolicitud())
+                .idCarga(solicitudGuardada.getIdCarga())
+                .idUsuario(solicitudGuardada.getIdUsuario())
+                .idTipoReporte(solicitudGuardada.getIdTipoReporte())
+                .rutaArchivo(rutaArchivo)
+                .build();
+
+        // enviamos la notificacion para que comience el procesamiento del archivo
+        procesamientoClient.notificarArchivoListo(procesarArchivoRequest);
+
+        return solicitudGuardada;
     }
 
     // helper para generar un id de carga usando una secuencia de Oracle
     private Long generarIdCarga() {
         return jdbcTemplate.queryForObject(
-                "SELECT seq_carga.NEXTVAL FROM dual",
-                Long.class);
+                "SELECT seq_carga.NEXTVAL FROM dual", Long.class);
     }
 
     // obtener solicitud por su id en modo solo lectura
@@ -261,6 +278,37 @@ public class SolicitudReporteService {
             throw new RuntimeException("No tiene permisos para consultar reportes de otro usuario");
         }
     }
+
+    public SolicitudReporteJpa procesarCallback(ProcesamientoCallbackRequest request){
+        // si la request tiene un id invalido
+        if (request.getIdSolicitud() == null){
+            throw new RuntimeException("El id no puede ser nulo");
+        }
+
+        // si la request tiene un estado null..
+        if (request.getEstadoSolicitado() == null){
+            throw new RuntimeException("El estado de solicitud es obligatorio");
+        }
+
+        // se valida el estado de la solicitud
+        validarEstado(request.getEstadoSolicitado());
+
+        // se busca el id de la soli, sino existe error!
+        SolicitudReporteJpa solicitud = solicitudReporteJpaRepository.findById(request.getIdSolicitud()).
+                orElseThrow(() -> new RuntimeException("Solicitud de reporte no encontrada"));
+
+        // se setea el estado de la solicitud
+        solicitud.setEstadoSolicitado(request.getEstadoSolicitado());
+
+        // se verifica que la ruta no sea nula y que tampoco este en blanco
+        if (request.getRutaReporte() !=null && !request.getRutaReporte().isBlank()){
+            solicitud.setRutaReporte(request.getRutaReporte());
+        } // si esta todo ok , se consigue la ruta y se setea a la solicitud
+
+        // se guarda la solicitud
+        return solicitudReporteJpaRepository.save(solicitud);
+    }
+
 
     // un simple helper para ver si el rol es uno o sea administrador
     private boolean esAdministrador(Long idRolSolicitante) {
