@@ -15,7 +15,7 @@ public class ProcesamientoClient { // usamos restclient para consumir externos d
 
     // el endpoint
     public void notificarArchivoListo(ProcesarArchivoRequest request){
-        restClient.post().uri("/api/procesamiento/archivo-listo/")
+        restClient.post().uri("/api/procesararchivolisto-archivo-listo")
                 .body(request).retrieve().toBodilessEntity();
     } // body(request) convierte el objeto a json
     // el bodyess sirve para que spring no lea el cuerpo de la response, solo saber si la call fue exitosa

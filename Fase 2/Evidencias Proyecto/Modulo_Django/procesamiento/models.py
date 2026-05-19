@@ -1,5 +1,7 @@
 from django.db import models
 
+# aqui tendremos las entidades (al estilo spring)
+
 # Entidad Rol
 class Rol(models.Model):
     id_rol = models.IntegerField(primary_key=True, db_column='ID_ROL')
