@@ -84,7 +84,7 @@ CREATE TABLE error_proceso (
     procedimiento_origen            VARCHAR2(100) NOT NULL,
     mensaje_error                   VARCHAR2(255) NOT NULL,
     fecha_error                     DATE NOT NULL,
-    id_usuario                      NUMBER(10) NOT NULL,
+    id_usuario                      NUMBER(10) NULL,
     id_carga                        NUMBER(10) NOT NULL,
     id_registro_llamada             NUMBER(10) NULL,
     detalle_error                   VARCHAR2(255) NOT NULL

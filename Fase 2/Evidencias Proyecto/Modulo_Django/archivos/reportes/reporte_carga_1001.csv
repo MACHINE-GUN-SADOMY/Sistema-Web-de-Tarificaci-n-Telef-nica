@@ -1,0 +1,6 @@
+﻿Usuario;Anexo;Proveedor;Tipo de Llamada;Duración Total (segundos);Cantidad de Llamadas del Usuario;Cantidad Total de Llamadas;Tiempo Total de la Carga (segundos);Promedio de Duración (segundos);Costo Calculado;Fecha de Proceso
+admin;101;ENTEL;MOVIL;120;5;5;705;141;2400.00;2026-05-22
+admin;101;MOVISTAR;LOCAL;60;5;5;705;141;630.00;2026-05-22
+admin;102;CLARO;NACIONAL;300;5;5;705;141;4860.00;2026-05-22
+admin;103;WOM;MOVIL;45;5;5;705;141;927.00;2026-05-22
+admin;104;ENTEL;INTERNACIONAL;180;5;5;705;141;7200.00;2026-05-22

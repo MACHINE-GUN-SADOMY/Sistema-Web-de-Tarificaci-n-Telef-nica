@@ -1,12 +1,44 @@
 import os
 
+from rest_framework import serializers
+from .GeneradorReportesService import GeneradorReportesService
 from .ProcesadorLlamadasService import ProcesadorLlamadasService
-from .orm import (existSolicitudReporteById, existTipoReporteById, existUsuarioById, findSolicitudReporteById,
-                  insertarRegistrosLlamada)
+from .orm import (existTipoReporteById, existUsuarioById, findSolicitudReporteById,
+                  insertarRegistrosLlamada, tarificar_carga, mostrarTodasLasTarificaciones,
+                  existReporteTarificacionById, eliminarReporteTarificacionPorIdReporte,
+                  mostrarTarificacionPorIdReporte, mostrarTarificacionPorIdCarga)
+
+# Mostrar todas las tarififaciones
+def mostrarTarificaciones():
+    reportes = mostrarTodasLasTarificaciones()
+
+    if reportes is None:
+        raise serializers.ValidationError("No hay reportes")
+
+    return reportes
+
+# mostrara el reporte por id de carga
+def mostrarTarificacionPorId(data):
+    tarifiacion = mostrarTarificacionPorIdReporte(data["idReporteTarificacion"])
+
+    if tarifiacion is None:
+        raise serializers.ValidationError("La carga no existe")
+
+    return tarifiacion
+
+def eliminarReportePorIdReporte(data):
+    eliminarReporteTarificacionPorIdReporte(data["idReporteTarificacion"])
+
+    validarReporte = validarIdReporte(data["idReporteTarificacion"])
+
+    if validarReporte is False:
+        raise serializers.ValidationError("No hay reporte para eliminar")
+
+    return True
 
 # aca coordinamos todo el flujo despues de que el sistema de carga (que viene desde java) nos avisa que el archivo ya esta listo en el servidor.
 # la meta aca es procesar el archivo de llamadas telefonicas y meterlo a la base de datos de tarificacion de manera segura.
-def procesarArchivoListo(data):
+def procesarArchivoTarificarCarga(data):
     # desempaquetamos los parametros claves del reporte que nos mandan. los guardamos en variables locales
     # para que sea mas facil leer el codigo y no andar escribiendo data["clave"] a cada rato.
     id_solicitud = data["idSolicitud"]
@@ -43,10 +75,23 @@ def procesarArchivoListo(data):
     # usamos bulk_create para meter todo de un solo golpe. esto ahorra muchisimo tiempo de conexion y hace que el proceso tome segundos.
     insertarRegistrosLlamada(registros_limpios)
 
+    # luego de insertar los registros, lo que haremos sera llamar al pr, desde la funcion de ORM para tarificar todo
+    tarificar_carga(id_carga)
+
+    # aqui creamos un objeto que tenga las tarificaciones
+    reportes_tarificados = mostrarTarificacionPorIdCarga(id_carga)
+
+    # luego ya generamos el reporte segun el tipo_reporte, para que pueda armar el PDF o CSV
+    ruta_reporte = GeneradorReportesService().generarReporte(
+        reportes_tarificados,
+        id_carga,
+        id_tipo_reporte)
+
     # al terminar, le avisamos al resto del sistema que la carga fue exitosa, devolviendo los ids para actualizar el estado del proceso en la base de datos.
     return {"mensaje": "Archivo recibido correctamente por Django",
             "id_solicitud": id_solicitud,
-            "id_carga": id_carga}
+            "id_carga":  id_carga,
+            "registrosInsertados": len(registros_limpios)}
 
 # este metodo actua como un escudo de integridad referencial antes de procesar el archivo plano.
 # si el usuario que subio el archivo no existe, la solicitud no existe o el tipo de reporte no coincide, el proceso es invalido por negocio.
@@ -66,3 +111,11 @@ def validarArchivo(id_solicitud: int,id_carga: int,id_usuario: int,id_tipo_repor
 
     # si paso todos los controles de negocio y fisicos, devolvemos la solicitud para que el flujo principal pueda continuar su marcha.
     return solicitud
+
+# verificar si existe el reporte
+def validar(id_reporte: int):
+    return existReporteTarificacionById(id_reporte) is not False
+
+# verificar si existe el reporte
+def validarIdReporte(id_reporte: int):
+    return existReporteTarificacionById(id_reporte) is not False # usariamos none si fuese un objeto no bool

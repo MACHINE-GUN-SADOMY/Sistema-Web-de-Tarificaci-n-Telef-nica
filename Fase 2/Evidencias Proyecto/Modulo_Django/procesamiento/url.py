@@ -5,7 +5,25 @@ from procesamiento.api import *
 urlpatterns = [
     path(
         'procesar-archivo-listo/',
-        ProcesamientoCompletado.as_view(),
-        name='api/procesararchivolisto'
+        ProcesamientoLlamadas.as_view(),
+        name='procesarArchivo'
+    ),
+
+    path(
+        'mostrar-tarificaciones/',
+        MostrarTodasLasTarificaciones.as_view(),
+        name='mostrarTarificaciones'
+    ),
+
+    path(
+        'mostrar-tarificacion/<int:id>/',
+        MostrarTarifificacionPorIdReporte.as_view(),
+        name='mostrarTarificacion'
+    ),
+
+    path(
+      'eliminar-tarificacion/<int:id>/',
+        EliminarTarificacion.as_view(),
+        name='eliminarTarificacion'
     ),
 ]

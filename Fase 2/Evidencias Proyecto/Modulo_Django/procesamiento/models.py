@@ -85,10 +85,9 @@ class ReporteTarificacion(models.Model):
     total_tiempo_carga = models.IntegerField(db_column='TOTAL_TIEMPO_CARGA')
     prom_duracion_llamada = models.IntegerField(db_column='PROM_DURACION_LLAMADA')
     costo_calculado = models.IntegerField(db_column='COSTO_CALCULADO')
-    fecha_proceso = models.DateField(db_column='FECHA_PROCESO')
+    fecha_proceso = models.DateField(db_column='FECHA_PROCESADO')
     # FK
     id_usuario = models.ForeignKey(Usuario, on_delete=models.DO_NOTHING, db_column='ID_USUARIO')
-    id_registro_llamada = models.ForeignKey(RegistroLlamada, on_delete=models.DO_NOTHING, db_column='ID_REGISTRO_LLAMADA')
     id_tipo_llamada = models.ForeignKey(TipoLlamada, on_delete=models.DO_NOTHING, db_column='ID_TIPO_LLAMADA')
 
     def __str__(self):

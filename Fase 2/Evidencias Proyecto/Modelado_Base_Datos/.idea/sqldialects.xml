@@ -3,10 +3,10 @@
   <component name="SqlDialectMappings">
     <file url="file://$PROJECT_DIR$/funciones.sql" dialect="OracleSqlPlus" />
     <file url="file://$PROJECT_DIR$/funciones_completas.sql" dialect="Oracle" />
-    <file url="file://$PROJECT_DIR$/pkg_terminado.sql" dialect="Oracle" />
+    <file url="file://$PROJECT_DIR$/pkg_terminado.sql" dialect="OracleSqlPlus" />
     <file url="file://$PROJECT_DIR$/pobla_tablas_para_probar.sql" dialect="Oracle" />
     <file url="file://$PROJECT_DIR$/procedimientos.sql" dialect="Oracle" />
-    <file url="file://$PROJECT_DIR$/script_create_table.sql" dialect="Oracle" />
+    <file url="file://$PROJECT_DIR$/script_create_table.sql" dialect="OracleSqlPlus" />
     <file url="file://$PROJECT_DIR$/secuencias_completa.sql" dialect="Oracle" />
     <file url="file://$PROJECT_DIR$/triggers.sql" dialect="Oracle" />
   </component>
