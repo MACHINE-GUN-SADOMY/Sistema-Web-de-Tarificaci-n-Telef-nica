@@ -25,7 +25,8 @@ class MostrarTodasLasTarificaciones(APIView):
             return Response({
                 "mensaje": "Error de validacion",
                 "detalle": str(exception)
-            },  # aqui el estado
+            },
+                # aqui el estado
                 status=status.HTTP_400_BAD_REQUEST)
 
 class MostrarTarifificacionPorIdReporte(APIView):
