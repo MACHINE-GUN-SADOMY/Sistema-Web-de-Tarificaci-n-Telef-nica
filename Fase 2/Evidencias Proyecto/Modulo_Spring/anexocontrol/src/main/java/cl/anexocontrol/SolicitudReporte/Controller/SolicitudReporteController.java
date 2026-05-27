@@ -1,6 +1,8 @@
 package cl.anexocontrol.SolicitudReporte.Controller;
 
 import cl.anexocontrol.SolicitudReporte.Controller.Dto.Request.ActualizarEstadoSolicitudRequest;
+import cl.anexocontrol.SolicitudReporte.Controller.Dto.Request.ProcesamientoCallbackRequest;
+import cl.anexocontrol.SolicitudReporte.Controller.Dto.Request.SolicitudReporteCallbackRequest;
 import cl.anexocontrol.SolicitudReporte.Controller.Dto.Response.SolicitudReporteResponse;
 import cl.anexocontrol.SolicitudReporte.Repository.Jpa.SolicitudReporteJpa;
 import cl.anexocontrol.SolicitudReporte.Service.SolicitudReporteService;
@@ -15,6 +17,8 @@ import org.springframework.web.bind.annotation.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
+
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
@@ -178,6 +182,17 @@ public class SolicitudReporteController {
                     .status(HttpStatus.BAD_REQUEST)
                     .body("Error al descargar el reporte");
         }
+    }
+
+    @PostMapping("/callback")
+    public ResponseEntity<?> recibirCallbackProcesamiento(
+            @RequestBody ProcesamientoCallbackRequest request
+    ) {
+        solicitudReporteService.procesarCallback(request);
+
+        return ResponseEntity.ok(Map.of(
+                "mensaje", "Callback procesado correctamente"
+        ));
     }
 
     // mapeador manual de entidad a dto

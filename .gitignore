@@ -1,5 +1,26 @@
-Fase 2/Evidencias Proyecto/Modulo_Django/archivos/reportes/reporte_carga_1001.pdf
-Fase 2/Evidencias Proyecto/Modulo_Django/procesamiento/__pycache__/api.cpython-314.pyc
-Fase 2/Evidencias Proyecto/Modulo_Django/procesamiento/__pycache__/GeneradorReportesService.cpython-314.pyc
-Fase 2/Evidencias Proyecto/Modulo_Django/procesamiento/__pycache__/api.cpython-314.pyc
-Fase 2/Evidencias Proyecto/Modulo_Django/procesamiento/__pycache__/GeneradorReportesService.cpython-314.pyc
+# ===============================
+# Python / Django cache
+# ===============================
+__pycache__/
+*.py[cod]
+*$py.class
+
+Fase 2/Evidencias Proyecto/Modulo_Django/**/__pycache__/
+Fase 2/Evidencias Proyecto/Modulo_Django/**/*.pyc
+
+
+# ===============================
+# Reportes generados antiguos en Django
+# ===============================
+Fase 2/Evidencias Proyecto/Modulo_Django/archivos/reportes/*
+!Fase 2/Evidencias Proyecto/Modulo_Django/archivos/reportes/.gitkeep
+
+
+# ===============================
+# Archivos generados por Spring / AnexoControl
+# ===============================
+Fase 2/Evidencias Proyecto/Modulo_Spring/anexocontrol/archivos/pendientes/*
+Fase 2/Evidencias Proyecto/Modulo_Spring/anexocontrol/archivos/reportes/*
+
+!Fase 2/Evidencias Proyecto/Modulo_Spring/anexocontrol/archivos/pendientes/.gitkeep
+!Fase 2/Evidencias Proyecto/Modulo_Spring/anexocontrol/archivos/reportes/.gitkeep

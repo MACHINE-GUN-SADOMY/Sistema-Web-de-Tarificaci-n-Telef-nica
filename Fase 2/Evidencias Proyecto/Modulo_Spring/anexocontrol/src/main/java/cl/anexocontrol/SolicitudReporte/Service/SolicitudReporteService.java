@@ -5,18 +5,22 @@ import cl.anexocontrol.SolicitudReporte.Client.ProcesamientoClient;
 import cl.anexocontrol.SolicitudReporte.Controller.Dto.Request.ActualizarEstadoSolicitudRequest;
 import cl.anexocontrol.SolicitudReporte.Controller.Dto.Request.ProcesamientoCallbackRequest;
 import cl.anexocontrol.SolicitudReporte.Controller.Dto.Request.ProcesarArchivoRequest;
+import cl.anexocontrol.SolicitudReporte.Controller.Dto.Request.SolicitudReporteCallbackRequest;
 import cl.anexocontrol.SolicitudReporte.Controller.ProcesamientoCallbackController;
 import cl.anexocontrol.SolicitudReporte.Repository.Jpa.SolicitudReporteJpa;
 import cl.anexocontrol.SolicitudReporte.Repository.SolicitudReporteJpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import cl.anexocontrol.Archivo.Service.ArchivoService;
+import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-@Transactional
 @Service
 public class SolicitudReporteService {
     private final SolicitudReporteJpaRepository solicitudReporteJpaRepository;
@@ -72,9 +76,24 @@ public class SolicitudReporteService {
                 .build();
 
         // enviamos la notificacion para que comience el procesamiento del archivo
-        procesamientoClient.notificarArchivoListo(procesarArchivoRequest);
+        try {
+            // enviamos la notificacion para que comience el procesamiento del archivo
+            // si Django responde 200, asumimos que procesó y generó el reporte
+            procesamientoClient.notificarArchivoListo(procesarArchivoRequest);
 
-        return solicitudGuardada;
+            String rutaReporte = construirRutaReporte(rutaArchivo, idCarga, idTipoReporte);
+
+            solicitudGuardada.setEstadoSolicitado(EstadoSolicitudEnum.LISTO.name());
+            solicitudGuardada.setRutaReporte(rutaReporte);
+
+            return solicitudReporteJpaRepository.save(solicitudGuardada);
+
+        } catch (Exception exception) {
+            solicitudGuardada.setEstadoSolicitado(EstadoSolicitudEnum.ERROR.name());
+            solicitudGuardada.setRutaReporte("ERROR");
+
+            return solicitudReporteJpaRepository.save(solicitudGuardada);
+        }
     }
 
     // helper para generar un id de carga usando una secuencia de Oracle
@@ -161,6 +180,7 @@ public class SolicitudReporteService {
         return solicitudes.stream().filter(solicitud -> solicitud.getIdUsuario().equals(idUsuarioSolicitante)).toList();
     }
 
+    @Transactional
     // actualiza el estado de la solicitud y su ruta
     public SolicitudReporteJpa actualizarEstado(Long idSolicitud, ActualizarEstadoSolicitudRequest request) {
         if (idSolicitud == null) {
@@ -279,39 +299,85 @@ public class SolicitudReporteService {
         }
     }
 
-    public SolicitudReporteJpa procesarCallback(ProcesamientoCallbackRequest request){
-        // si la request tiene un id invalido
-        if (request.getIdSolicitud() == null){
-            throw new RuntimeException("El id no puede ser nulo");
+    @Transactional
+    public SolicitudReporteJpa procesarCallback(ProcesamientoCallbackRequest request) {
+
+        // Validar id solicitud
+        if (request.getIdSolicitud() == null) {
+            throw new RuntimeException("El id de la solicitud no puede ser nulo");
         }
 
-        // si la request tiene un estado null..
-        if (request.getEstadoSolicitado() == null){
+        // Validar estado
+        if (request.getEstadoSolicitado() == null || request.getEstadoSolicitado().isBlank()) {
             throw new RuntimeException("El estado de solicitud es obligatorio");
         }
 
-        // se valida el estado de la solicitud
-        validarEstado(request.getEstadoSolicitado());
+        // Normalizar estado
+        String estado = request.getEstadoSolicitado().trim().toUpperCase();
 
-        // se busca el id de la soli, sino existe error!
-        SolicitudReporteJpa solicitud = solicitudReporteJpaRepository.findById(request.getIdSolicitud()).
-                orElseThrow(() -> new RuntimeException("Solicitud de reporte no encontrada"));
+        // Validar que el estado sea permitido
+        validarEstado(estado);
 
-        // se setea el estado de la solicitud
-        solicitud.setEstadoSolicitado(request.getEstadoSolicitado());
+        // Buscar solicitud
+        SolicitudReporteJpa solicitud = solicitudReporteJpaRepository.findById(request.getIdSolicitud())
+                .orElseThrow(() -> new RuntimeException("Solicitud de reporte no encontrada"));
 
-        // se verifica que la ruta no sea nula y que tampoco este en blanco
-        if (request.getRutaReporte() !=null && !request.getRutaReporte().isBlank()){
+        // Caso LISTO
+        if ("LISTO".equals(estado)) {
+
+            if (request.getRutaReporte() == null || request.getRutaReporte().isBlank()) {
+                throw new RuntimeException("La ruta del reporte es obligatoria cuando la solicitud queda LISTO");
+            }
+
+            solicitud.setEstadoSolicitado(estado);
             solicitud.setRutaReporte(request.getRutaReporte());
-        } // si esta todo ok , se consigue la ruta y se setea a la solicitud
+        }
 
-        // se guarda la solicitud
+        // Caso ERROR
+        else if ("ERROR".equals(estado)) {
+            solicitud.setEstadoSolicitado(estado);
+            solicitud.setRutaReporte("ERROR");
+        }
+
+        // Otros estados validos, por si quieres permitir GENERANDO o PENDIENTE
+        else {
+            solicitud.setEstadoSolicitado(estado);
+
+            if (request.getRutaReporte() != null && !request.getRutaReporte().isBlank()) {
+                solicitud.setRutaReporte(request.getRutaReporte());
+            }
+        }
+
         return solicitudReporteJpaRepository.save(solicitud);
     }
-
 
     // un simple helper para ver si el rol es uno o sea administrador
     private boolean esAdministrador(Long idRolSolicitante) {
         return idRolSolicitante != null && idRolSolicitante.equals(1L);
     }
+
+    private String construirRutaReporte(String rutaArchivo, Long idCarga, Integer idTipoReporte) {
+        String extension;
+
+        if (idTipoReporte == 1) {
+            extension = "pdf";
+        } else if (idTipoReporte == 2) {
+            extension = "csv";
+        } else {
+            throw new RuntimeException("Tipo de reporte no valido");
+        }
+
+        Path rutaArchivoPath = Paths.get(rutaArchivo);
+
+        Path carpetaArchivos = rutaArchivoPath
+                .getParent()   // pendientes
+                .getParent();  // archivos
+
+        return carpetaArchivos
+                .resolve("reportes")
+                .resolve("reporte_carga_" + idCarga + "." + extension)
+                .toString();
+    }
+
 }
+

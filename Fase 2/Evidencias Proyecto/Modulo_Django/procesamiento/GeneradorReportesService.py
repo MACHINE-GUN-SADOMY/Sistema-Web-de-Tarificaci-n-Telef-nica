@@ -40,7 +40,7 @@ class GeneradorReportesService:
     # para generar los CSV
     def generarReporteCSV(self, reportes, idCarga: int):
         # se crea la carpeta en la base de la direccion
-        carpeta_reportes = os.path.join(settings.BASE_DIR, "archivos","reportes")
+        carpeta_reportes = os.path.join(settings.ARCHIVOS_BASE_DIR, "reportes")
         os.makedirs(carpeta_reportes, exist_ok=True)
 
         # se pone el nombre al archivo
@@ -89,41 +89,51 @@ class GeneradorReportesService:
         # luego retorna la ubicacion del reporte
         return ruta_reporte
 
+    # para generar los PDF
     def generarReportePDF(self, reportes, idCarga: int):
-        carpeta_reportes = os.path.join(settings.BASE_DIR, "archivos","reportes")
+        # se crea la carpeta en la base de la direccion
+        carpeta_reportes = os.path.join(settings.ARCHIVOS_BASE_DIR, "reportes")
         os.makedirs(carpeta_reportes, exist_ok=True)
 
+        # se pone el nombre al archivo
         nombre_archivo = f"reporte_carga_{idCarga}.pdf"
         ruta_reporte = os.path.join(carpeta_reportes, nombre_archivo)
 
+        # se crea el documento base
         documento = SimpleDocTemplate(
             ruta_reporte,
             pagesize=landscape(letter)
         )
 
+        # se obtienen los estilos por defecto
         estilos = getSampleStyleSheet()
         elementos = []
 
+        # se crea el titulo del reporte
         titulo = Paragraph(f"Reporte de Tarificación - Carga {idCarga}", estilos["Title"])
 
         elementos.append(titulo)
         elementos.append(Spacer(1,12))
 
+        # se ejecuta solo una vez para definir titulos de columna
         datos_tabla = [
-            ["Usuario",
-            "Anexo",
-            "Proveedor",
-            "Tipo de Llamada",
-            "Duración Total",
-            "Cant. Usuario",
-            "Cant. Total",
-            "Tiempo Total",
-            "Promedio",
-            "Costo",
-            "Fecha"]
+            [
+                "Usuario",
+                "Anexo",
+                "Proveedor",
+                "Tipo de Llamada",
+                "Duración Total (segundos)",
+                "Cantidad de Llamadas del Usuario",
+                "Cantidad Total de Llamadas",
+                "Tiempo Total de la Carga (segundos)",
+                "Promedio de Duración (segundos)",
+                "Costo Calculado",
+                "Fecha de Proceso"
+            ]
         ]
 
-        for reporte in reportes:
+        # luego pasara por cada uno de los reportes para escribir
+        for reporte in reportes: # este sera por for
             datos_tabla.append([
                 str(reporte.id_usuario.nombre_usuario),
                 str(reporte.anexo),
@@ -138,8 +148,10 @@ class GeneradorReportesService:
                 str(reporte.fecha_proceso)
             ])
 
+        # se crea el objeto de la tabla
         tabla = Table(datos_tabla, repeatRows=1)
 
+        # se le entregan los parametros de estilos
         tabla.setStyle(TableStyle([
             ("BACKGROUND", (0, 0), (-1, 0), colors.lightgrey),
             ("TEXTCOLOR", (0, 0), (-1, 0), colors.black),
@@ -154,8 +166,10 @@ class GeneradorReportesService:
 
         elementos.append(tabla)
 
+        # se construye el pdf final
         documento.build(elementos)
 
         self.rutaReporte = ruta_reporte
 
+        # luego retorna la ubicacion del reporte
         return ruta_reporte

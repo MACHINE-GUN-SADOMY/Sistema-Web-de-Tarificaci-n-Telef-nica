@@ -3,6 +3,7 @@ import os
 from rest_framework import serializers
 from .GeneradorReportesService import GeneradorReportesService
 from .ProcesadorLlamadasService import ProcesadorLlamadasService
+from .SpringCallbackService import SpringCallbackService
 from .orm import (existTipoReporteById, existUsuarioById, findSolicitudReporteById,
                   insertarRegistrosLlamada, tarificar_carga, mostrarTodasLasTarificaciones,
                   existReporteTarificacionById, eliminarReporteTarificacionPorIdReporte,
@@ -81,35 +82,45 @@ def procesarArchivoTarificarCarga(data):
     # aqui creamos un objeto que tenga las tarificaciones
     reportes_tarificados = mostrarTarificacionPorIdCarga(id_carga)
 
-    # luego ya generamos el reporte segun el tipo_reporte, para que pueda armar el PDF o CSV
     ruta_reporte = GeneradorReportesService().generarReporte(
         reportes_tarificados,
         id_carga,
-        id_tipo_reporte)
+        id_tipo_reporte
+    )
+
+    SpringCallbackService().notificarSolicitudLista(
+        id_solicitud,
+        ruta_reporte
+    )
+
 
     # al terminar, le avisamos al resto del sistema que la carga fue exitosa, devolviendo los ids para actualizar el estado del proceso en la base de datos.
-    return {"mensaje": "Archivo recibido correctamente por Django",
-            "id_solicitud": id_solicitud,
-            "id_carga":  id_carga,
-            "registrosInsertados": len(registros_limpios)}
+    return {
+        "mensaje": "Archivo procesado, tarificado y reporte generado correctamente",
+        "id_solicitud": id_solicitud,
+        "id_carga": id_carga,
+        "registrosInsertados": len(registros_limpios),
+        "rutaReporte": ruta_reporte
+    }
 
 # este metodo actua como un escudo de integridad referencial antes de procesar el archivo plano.
 # si el usuario que subio el archivo no existe, la solicitud no existe o el tipo de reporte no coincide, el proceso es invalido por negocio.
 # tambien nos asegura que el archivo realmente exista en la ruta que nos pasaron para evitar errores de archivo no encontrado (filenotfounderror).
-def validarArchivo(id_solicitud: int,id_carga: int,id_usuario: int,id_tipo_reporte: int,ruta_archivo: str):
-    # traemos la solicitud de la base de datos usando el repositorio. la necesitamos no solo para validar que exista, 
-    # sino tambien para retornarla al final si es que el flujo de validacion pasa correctamente.
-    solicitud = findSolicitudReporteById(id_carga)
+def validarArchivo(id_solicitud: int, id_carga: int, id_usuario: int, id_tipo_reporte: int, ruta_archivo: str):
+    solicitud = findSolicitudReporteById(id_solicitud)
 
-    # agrupamos todas las condiciones criticas en una sola expresion logica. si falta el usuario, la solicitud, el tipo de reporte,
-    # o si el archivo no esta fisicamente en la ruta indicada, retornamos false de inmediato. preferimos esta evaluacion rapida
-    # para cortar el flujo temprano (guardia) sin anidar muchos condicionales.
-    if (not existUsuarioById(id_usuario) or
-        not solicitud or
-        not existTipoReporteById(id_tipo_reporte) or
-        not os.path.exists(ruta_archivo)):return False
+    if not existUsuarioById(id_usuario):
+        raise serializers.ValidationError("El usuario no existe")
 
-    # si paso todos los controles de negocio y fisicos, devolvemos la solicitud para que el flujo principal pueda continuar su marcha.
+    if not solicitud:
+        raise serializers.ValidationError("La solicitud de reporte no existe")
+
+    if not existTipoReporteById(id_tipo_reporte):
+        raise serializers.ValidationError("El tipo de reporte no existe")
+
+    if not os.path.exists(ruta_archivo):
+        raise serializers.ValidationError(f"El archivo no existe en la ruta indicada: {ruta_archivo}")
+
     return solicitud
 
 # verificar si existe el reporte

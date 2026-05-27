@@ -11,4 +11,5 @@ public class ProcesamientoCallbackRequest {
     private Long idSolicitud;
     private String estadoSolicitado;
     private String rutaReporte;
+    private String mensajeError;
 }

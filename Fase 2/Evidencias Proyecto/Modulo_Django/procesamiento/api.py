@@ -48,26 +48,40 @@ class MostrarTarifificacionPorIdReporte(APIView):
 
 class ProcesamientoLlamadas(APIView):
     # procesar , validar archivo
-    def post(self,request):
+    def post(self, request):
         serializer = ProcesarArchivoRequest(data=request.data)
 
         if not serializer.is_valid():
             return Response(
-                {"mensaje" : "Error de validacion",
-                "errores" : serializer.errors})
+                {
+                    "mensaje": "Error de validacion",
+                    "errores": serializer.errors
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         try:
             resultado = procesarArchivoTarificarCarga(serializer.validated_data)
 
-            return Response(resultado, status=status.HTTP_202_ACCEPTED) # no se crea un nuevo recurso, solo se valida
+            return Response(resultado, status=status.HTTP_202_ACCEPTED)
 
-        # si falla la validacion dara este error con el serializer
         except serializers.ValidationError as exception:
-            return Response({
-                "mensaje" : "Error de validacion",
-                "detalle" : str(exception)
-            },
-            status=status.HTTP_400_BAD_REQUEST) # revisar codigo de error
+            return Response(
+                {
+                    "mensaje": "Error de validacion",
+                    "detalle": str(exception)
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        except Exception as exception:
+            return Response(
+                {
+                    "mensaje": "Error inesperado",
+                    "detalle": str(exception)
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 class EliminarTarificacion(APIView):
     def delete(self,request,id):
