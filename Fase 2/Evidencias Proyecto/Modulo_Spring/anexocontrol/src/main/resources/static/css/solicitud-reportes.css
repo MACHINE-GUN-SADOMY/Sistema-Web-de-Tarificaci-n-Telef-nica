@@ -1,0 +1,351 @@
+/* =========================================================
+   SOLICITUD DE REPORTES - AnexoControl
+   Archivo: solicitud-reportes.css
+   Requiere: layout.css (variables y estructura base)
+   ========================================================= */
+
+/* =========================
+   Título de sección en form
+   ========================= */
+
+.form-section-title {
+    margin: 0 0 28px;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.02em;
+}
+
+/* =========================
+   Zona de carga de archivo
+   (CSS puro — label wraps input)
+   ========================= */
+
+.upload-zone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 180px;
+    border: 2px dashed rgba(132, 148, 149, 0.32);
+    background: rgba(12, 19, 36, 0.45);
+    padding: 36px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.upload-zone:hover,
+.upload-zone:focus-within {
+    border-color: var(--cyan);
+    background: rgba(0, 219, 233, 0.04);
+}
+
+.upload-zone-icon {
+    font-size: 40px;
+    color: var(--cyan);
+    opacity: 0.75;
+}
+
+.upload-zone-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.upload-zone-hint {
+    margin: 0;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-transform: uppercase;
+}
+
+/* Input real oculto visualmente pero accesible */
+.upload-zone-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+}
+
+/* =========================
+   Panel de tabla / historial
+   ========================= */
+
+.table-panel {
+    margin-top: 32px;
+    overflow: hidden;
+}
+
+.table-header {
+    padding: 22px 24px;
+    border-bottom: 1px solid var(--border-soft);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.table-title {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.table-title .material-symbols-outlined {
+    color: var(--cyan);
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+.dashboard-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.dashboard-table thead {
+    background: rgba(12, 19, 36, 0.28);
+}
+
+.dashboard-table th {
+    padding: 14px 24px;
+    text-align: left;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: var(--muted);
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border-soft);
+}
+
+.dashboard-table td {
+    padding: 16px 24px;
+    color: var(--text);
+    font-size: 15px;
+    border-bottom: 1px solid var(--border-soft);
+    vertical-align: middle;
+}
+
+.dashboard-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.dashboard-table tbody tr:hover {
+    background: rgba(46, 52, 71, 0.22);
+}
+
+/* =========================
+   Celda vacía
+   ========================= */
+
+.table-empty {
+    text-align: center;
+    padding: 48px 24px !important;
+    color: var(--muted) !important;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px !important;
+    letter-spacing: 0.08em;
+}
+
+.table-empty .material-symbols-outlined {
+    display: block;
+    font-size: 32px;
+    margin-bottom: 12px;
+    opacity: 0.4;
+}
+
+/* =========================
+   Badges de tipo e ID
+   ========================= */
+
+.table-id {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+    color: var(--text);
+}
+
+.type-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    padding: 4px 10px;
+    background: rgba(132, 148, 149, 0.12);
+    border: 1px solid var(--border-soft);
+    color: var(--text);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+}
+
+/* =========================
+   Badges de estado
+   ========================= */
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.status-badge::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: currentColor;
+    flex-shrink: 0;
+}
+
+.status-badge.listo {
+    color: var(--cyan);
+}
+
+.status-badge.pendiente {
+    color: var(--yellow);
+}
+
+.status-badge.error {
+    color: var(--red);
+}
+
+/* =========================
+   Links de acción en tabla
+   ========================= */
+
+.table-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text);
+    text-decoration: none;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.table-link:hover {
+    color: var(--cyan);
+}
+
+.table-link.danger {
+    color: var(--red);
+}
+
+.table-link.danger:hover {
+    color: #ff9ea6;
+}
+
+.table-link.warning {
+    color: var(--yellow);
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+/* =========================
+   Footer de tabla
+   ========================= */
+
+.table-footer {
+    padding: 14px 24px;
+    border-top: 1px solid var(--border-soft);
+    color: var(--muted);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.10em;
+}
+
+/* =========================
+   Nota de pie de página
+   ========================= */
+
+.form-footer-note {
+    margin: 32px 0 0;
+    text-align: center;
+    color: var(--muted-2);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+}
+
+/* =========================
+   Responsive
+   ========================= */
+
+@media (max-width: 760px) {
+    .upload-zone {
+        min-height: 140px;
+        padding: 28px 16px;
+    }
+
+    .upload-zone-icon {
+        font-size: 32px;
+    }
+
+    .dashboard-table th,
+    .dashboard-table td {
+        padding: 12px 16px;
+    }
+
+    .table-header {
+        padding: 18px 16px;
+    }
+
+    .table-footer {
+        padding: 12px 16px;
+    }
+}
+
+/* =========================
+   Mejoras tabla historial (P6)
+   ========================= */
+
+/* Anchos fijos para evitar desborde */
+.dashboard-table th,
+.dashboard-table td {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+}
+
+/* Columna acción alineada a la derecha */
+.dashboard-table th:last-child,
+.dashboard-table td:last-child {
+    text-align: right;
+    padding-right: 28px;
+    white-space: nowrap;
+    max-width: none;
+}
+
+/* Columna estado sin truncado */
+.dashboard-table td:nth-child(4) {
+    white-space: nowrap;
+    max-width: none;
+}
+
+/* Tabla no se desborda del contenedor */
+.table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}

@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+
+<head th:replace="~{fragments/layout :: head('Dashboard de Usuario', 'user-dashboard.css')}"></head>
+
+<body class="flux-body-user">
+
+    <!-- TOP APP BAR -->
+    <div th:replace="~{fragments/layout :: topbar-user}"></div>
+
+    <!-- SIDEBAR DE USUARIO -->
+    <div th:replace="~{fragments/layout :: sidebar-user(${activeSection ?: 'dashboard'})}"></div>
+
+    <!-- ============================================================
+         CONTENIDO PRINCIPAL
+         ============================================================ -->
+    <main class="user-main md:ml-64 pt-20 min-h-screen px-4 md:px-margin-desktop pb-xl"
+          id="mainContent">
+        <div class="user-main__inner max-w-max-width mx-auto">
+
+            <!-- Alertas -->
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <!-- ================================================
+                 HEADER DE SECCIÓN
+                 ================================================ -->
+            <section class="user-page-header mb-lg" aria-labelledby="dashboardHeading">
+                <h1 class="user-page-title" id="dashboardHeading">Tarification Dashboard</h1>
+                <p class="user-page-subtitle">
+                    Suba sus registros de llamadas y configure los parámetros del reporte.
+                    Nuestro motor de alta precisión procesará los datos y generará analíticas detalladas.
+                </p>
+            </section>
+
+            <!-- ================================================
+                 BENTO GRID: Upload + Stats
+                 ================================================ -->
+            <div class="bento-grid" role="region" aria-label="Herramientas de tarificación">
+
+                <!-- Columna Izquierda: Upload + Configuración -->
+                <div class="bento-col bento-col--left space-y-gutter">
+
+                    <!-- ==============================
+                         ZONA DE CARGA DE ARCHIVO
+                         ============================== -->
+                    <div class="glass-panel-user p-md rounded-xl" id="panelUpload">
+                        <div class="panel-header">
+                            <h3 class="panel-title">Subir Registros</h3>
+                            <span class="panel-caption">Tamaño máx. 25 MB</span>
+                        </div>
+
+                        <form th:action="@{/user/solicitudes/subir}"
+                              method="POST"
+                              enctype="multipart/form-data"
+                              id="uploadForm"
+                              novalidate>
+                            <input type="hidden"
+                                   th:name="${_csrf.parameterName}"
+                                   th:value="${_csrf.token}"/>
+
+                            <!-- Drag & Drop Zone -->
+                            <div class="drag-zone"
+                                 id="dropZone"
+                                 role="button"
+                                 tabindex="0"
+                                 aria-label="Zona de carga: arrastre su archivo aquí o haga clic para seleccionar"
+                                 aria-describedby="dropZoneHint">
+
+                                <div class="drag-zone__icon-wrap" id="dropIcon">
+                                    <span class="material-symbols-outlined drag-zone__icon" aria-hidden="true">upload_file</span>
+                                </div>
+                                <p class="drag-zone__title" id="dropTitle">Arrastre sus registros aquí</p>
+                                <p class="drag-zone__hint" id="dropZoneHint">
+                                    Compatible con <code>.csv</code>, <code>.xlsx</code> y <code>.txt</code>
+                                </p>
+                                <p class="drag-zone__file-name hidden" id="dropFileName" aria-live="polite"></p>
+
+                                <input type="file"
+                                       id="fileInput"
+                                       name="archivoRegistros"
+                                       class="sr-only"
+                                       accept=".csv,.xlsx,.xls,.txt"
+                                       aria-hidden="true"
+                                       required/>
+                            </div>
+
+                        </form>
+                    </div>
+                    <!-- /ZONA DE CARGA -->
+
+                    <!-- ==============================
+                         CONFIGURACIÓN DE REPORTE
+                         ============================== -->
+                    <div class="glass-panel-user p-md rounded-xl" id="panelConfig">
+                        <h3 class="panel-title mb-md">Configuración de Reporte</h3>
+
+                        <form th:action="@{/user/solicitudes/crear}"
+                              method="POST"
+                              id="reportForm"
+                              novalidate>
+                            <input type="hidden"
+                                   th:name="${_csrf.parameterName}"
+                                   th:value="${_csrf.token}"/>
+
+                            <div class="config-row">
+                                <!-- Selector de tipo de reporte -->
+                                <div class="form-field flex-grow w-full" id="fieldTipoReporte">
+                                    <label for="tipoReporte" class="form-label-mono">Tipo de Reporte</label>
+                                    <select id="tipoReporte"
+                                            name="tipoReporte"
+                                            class="select-dark"
+                                            required
+                                            aria-required="true">
+                                        <option value="" disabled
+                                                th:selected="${tipoReporteSelected == null}">
+                                            Seleccione un tipo...
+                                        </option>
+                                        <option th:each="tipo : ${tiposReporte}"
+                                                th:value="${tipo.value}"
+                                                th:text="${tipo.label}"
+                                                th:selected="${tipo.value == tipoReporteSelected}">
+                                            Tipo de Reporte
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <!-- Periodo de análisis -->
+                                <div class="form-field" id="fieldPeriodo">
+                                    <label for="periodoAnalisis" class="form-label-mono">Período</label>
+                                    <select id="periodoAnalisis"
+                                            name="periodoAnalisis"
+                                            class="select-dark">
+                                        <option value="MENSUAL">Mensual</option>
+                                        <option value="SEMANAL">Semanal</option>
+                                        <option value="DIARIO">Diario</option>
+                                        <option value="PERSONALIZADO">Personalizado</option>
+                                    </select>
+                                </div>
+
+                                <!-- Botón de solicitar -->
+                                <button type="submit"
+                                        class="btn-solicitar"
+                                        id="btnSolicitar">
+                                    <span class="material-symbols-outlined" aria-hidden="true">bolt</span>
+                                    Solicitar
+                                </button>
+                            </div>
+
+                        </form>
+                    </div>
+                    <!-- /CONFIGURACIÓN DE REPORTE -->
+
+                </div>
+                <!-- /COLUMNA IZQUIERDA -->
+
+                <!-- Columna Derecha: Estado del Sistema -->
+                <div class="bento-col bento-col--right" role="complementary" aria-label="Estado del sistema">
+                    <div class="glass-panel-user rounded-xl overflow-hidden h-full flex flex-col" id="panelFluxStatus">
+
+                        <!-- Header del panel -->
+                        <div class="panel-header panel-header--bordered">
+                            <h3 class="panel-title">Current Flux Status</h3>
+                            <div class="status-indicator">
+                                <span class="status-dot status-dot--online" aria-hidden="true"></span>
+                                <span class="status-label">Online</span>
+                            </div>
+                        </div>
+
+                        <!-- Imagen de estado / visualización -->
+                        <div class="flux-visual relative flex-grow min-h-[300px]">
+                            <img th:src="@{/img/flux-visualization.png}"
+                                 src="/img/flux-visualization.png"
+                                 alt="Visualización del estado del sistema FLUX: flujos de datos en tiempo real"
+                                 class="flux-visual__img"
+                                 id="fluxVisualImg"/>
+                            <div class="flux-visual__gradient" aria-hidden="true"></div>
+
+                            <!-- Mini-stats superpuestos -->
+                            <div class="flux-stats-overlay" aria-label="Métricas del sistema">
+                                <div class="mini-stat glass-panel-mini" id="statProcessed">
+                                    <p class="mini-stat__label">Procesado Hoy</p>
+                                    <p class="mini-stat__value"
+                                       th:text="${fluxStats?.procesadoHoy ?: '—'}">
+                                        1.2 GB
+                                    </p>
+                                </div>
+                                <div class="mini-stat glass-panel-mini" id="statSpeed">
+                                    <p class="mini-stat__label">Vel. Promedio</p>
+                                    <p class="mini-stat__value"
+                                       th:text="${fluxStats?.velocidadPromedio ?: '—'}">
+                                        124 ms
+                                    </p>
+                                </div>
+                                <div class="mini-stat glass-panel-mini" id="statQueue">
+                                    <p class="mini-stat__label">En Cola</p>
+                                    <p class="mini-stat__value"
+                                       th:text="${fluxStats?.enCola ?: '—'}">
+                                        0
+                                    </p>
+                                </div>
+                                <div class="mini-stat glass-panel-mini" id="statUptime">
+                                    <p class="mini-stat__label">Uptime</p>
+                                    <p class="mini-stat__value"
+                                       th:text="${fluxStats?.uptime ?: '—'}">
+                                        99.9%
+                                    </p>
+                                </div>
+                            </div>
+                            <!-- /MINI-STATS -->
+
+                        </div>
+                    </div>
+                </div>
+                <!-- /COLUMNA DERECHA -->
+
+            </div>
+            <!-- /BENTO GRID -->
+
+            <!-- ================================================
+                 HISTORIAL DE SOLICITUDES
+                 Variable esperada: solicitudes (List<SolicitudDTO>)
+                 SolicitudDTO: id, fecha, nombreArchivo,
+                               tipoReporte, estado (LISTO|PROCESANDO|ERROR),
+                               urlDescarga
+                 ================================================ -->
+            <section class="history-section mt-lg" aria-labelledby="historialTitle">
+
+                <!-- Header de la sección -->
+                <div class="history-header" id="historialTitle">
+                    <h2 class="history-title">Historial de Solicitudes</h2>
+                    <div class="history-controls">
+                        <!-- Filtro de estado -->
+                        <form th:action="@{/user/dashboard}" method="GET" id="filtroForm">
+                            <select name="filtroEstado"
+                                    class="select-dark select-dark--sm"
+                                    id="filtroEstado"
+                                    onchange="this.form.submit()"
+                                    aria-label="Filtrar por estado">
+                                <option value=""
+                                        th:selected="${filtroEstado == null or filtroEstado == ''}">
+                                    Todos los estados
+                                </option>
+                                <option value="LISTO"
+                                        th:selected="${filtroEstado == 'LISTO'}">Listos</option>
+                                <option value="PROCESANDO"
+                                        th:selected="${filtroEstado == 'PROCESANDO'}">Procesando</option>
+                                <option value="ERROR"
+                                        th:selected="${filtroEstado == 'ERROR'}">Con error</option>
+                            </select>
+                        </form>
+                        <button type="button"
+                                class="btn-filter"
+                                id="btnFiltroHistorial"
+                                aria-label="Aplicar filtros">
+                            <span class="material-symbols-outlined" aria-hidden="true">filter_list</span>
+                            Filtrar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tabla del historial -->
+                <div class="glass-panel-user rounded-xl overflow-hidden" id="tablaHistorial">
+                    <div class="overflow-x-auto">
+                        <table class="data-table-user" aria-label="Historial de solicitudes de tarificación">
+                            <thead>
+                                <tr class="data-table-user__head-row">
+                                    <th class="data-table-user__th" scope="col">Fecha</th>
+                                    <th class="data-table-user__th" scope="col">Archivo</th>
+                                    <th class="data-table-user__th" scope="col">Tipo de Reporte</th>
+                                    <th class="data-table-user__th" scope="col">Estado</th>
+                                    <th class="data-table-user__th data-table-user__th--right" scope="col">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                <!-- Fila vacía -->
+                                <tr th:if="${#lists.isEmpty(solicitudes)}" class="data-table-user__row">
+                                    <td colspan="5" class="data-table-user__td data-table-user__td--empty">
+                                        <span class="material-symbols-outlined" aria-hidden="true">inbox</span>
+                                        <span>No tiene solicitudes registradas aún.</span>
+                                    </td>
+                                </tr>
+
+                                <!-- Filas dinámicas -->
+                                <tr th:each="sol : ${solicitudes}"
+                                    th:id="'solicitud-' + ${sol.id}"
+                                    class="data-table-user__row">
+
+                                    <!-- Fecha -->
+                                    <td class="data-table-user__td data-table-user__td--mono"
+                                        th:text="${#temporals.format(sol.fecha, 'yyyy-MM-dd')}">
+                                        2024-01-01
+                                    </td>
+
+                                    <!-- Nombre de archivo -->
+                                    <td class="data-table-user__td">
+                                        <div class="file-cell">
+                                            <span class="material-symbols-outlined file-cell__icon"
+                                                  aria-hidden="true">description</span>
+                                            <span th:text="${sol.nombreArchivo}">archivo.csv</span>
+                                        </div>
+                                    </td>
+
+                                    <!-- Tipo de reporte (badge) -->
+                                    <td class="data-table-user__td">
+                                        <span class="badge-type"
+                                              th:text="${sol.tipoReporteAbrev ?: sol.tipoReporte}">
+                                            PDF
+                                        </span>
+                                    </td>
+
+                                    <!-- Estado con indicador animado -->
+                                    <td class="data-table-user__td">
+                                        <div th:classappend="${sol.estado == 'LISTO'} ? ' status-ready' :
+                                                             (${sol.estado == 'PROCESANDO'} ? ' status-processing' : ' status-error')"
+                                             class="status-chip">
+                                            <span th:classappend="${sol.estado == 'PROCESANDO'} ? ' animate-pulse'"
+                                                  class="status-chip__dot"
+                                                  aria-hidden="true"></span>
+                                            <span th:text="${sol.estadoLabel ?: sol.estado}">Listo</span>
+                                        </div>
+                                    </td>
+
+                                    <!-- Botón de descarga -->
+                                    <td class="data-table-user__td data-table-user__td--right">
+                                        <a th:if="${sol.estado == 'LISTO'}"
+                                           th:href="@{/user/solicitudes/descargar/{id}(id=${sol.id})}"
+                                           class="btn-download"
+                                           th:attr="aria-label='Descargar reporte ' + ${sol.nombreArchivo}"
+                                           download>
+                                            <span class="material-symbols-outlined" aria-hidden="true">download</span>
+                                            Descargar
+                                        </a>
+                                        <button type="button"
+                                                th:unless="${sol.estado == 'LISTO'}"
+                                                class="btn-download btn-download--disabled"
+                                                disabled
+                                                aria-disabled="true"
+                                                th:attr="aria-label='Reporte ' + ${sol.nombreArchivo} + ' aún no disponible'">
+                                            <span class="material-symbols-outlined" aria-hidden="true">download</span>
+                                            Descargar
+                                        </button>
+                                    </td>
+
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Paginación del historial -->
+                    <div class="data-table-user__pagination"
+                         th:if="${!#lists.isEmpty(solicitudes)}"
+                         role="navigation"
+                         aria-label="Paginación del historial">
+                        <p class="pagination__info"
+                           th:text="'Mostrando ' + ${solicitudes.size()} + ' de ' + ${totalSolicitudes ?: '?'} + ' solicitudes'">
+                            Mostrando N de ? solicitudes
+                        </p>
+                        <div class="pagination__controls">
+                            <a th:href="@{/user/dashboard(page=${currentPage > 0 ? currentPage - 1 : 0}, filtroEstado=${filtroEstado})}"
+                               class="icon-btn-user"
+                               th:classappend="${currentPage == 0} ? ' icon-btn-user--disabled'"
+                               aria-label="Página anterior">‹</a>
+                            <span class="pagination__page"
+                                  th:text="${currentPage + 1}">1</span>
+                            <a th:href="@{/user/dashboard(page=${currentPage + 1}, filtroEstado=${filtroEstado})}"
+                               class="icon-btn-user"
+                               th:classappend="${!hasNextPage} ? ' icon-btn-user--disabled'"
+                               aria-label="Página siguiente">›</a>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- /TABLA DEL HISTORIAL -->
+
+            </section>
+            <!-- /HISTORIAL DE SOLICITUDES -->
+
+        </div>
+    </main>
+    <!-- /CONTENIDO PRINCIPAL -->
+
+    <!-- Scripts -->
+    <script th:src="@{/js/user-dashboard.js}" defer></script>
+
+    <script>
+        /* =====================================================
+           Drag & Drop — File Upload
+           ===================================================== */
+        (function () {
+            var dropZone = document.getElementById('dropZone');
+            var fileInput = document.getElementById('fileInput');
+            var dropTitle = document.getElementById('dropTitle');
+            var dropFileName = document.getElementById('dropFileName');
+            var dropIcon = document.getElementById('dropIcon');
+            var uploadForm = document.getElementById('uploadForm');
+
+            if (!dropZone || !fileInput) return;
+
+            // Clic en la zona abre el selector de archivo
+            dropZone.addEventListener('click', function () { fileInput.click(); });
+            dropZone.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') fileInput.click();
+            });
+
+            fileInput.addEventListener('change', function () {
+                if (fileInput.files.length > 0) {
+                    var file = fileInput.files[0];
+                    mostrarArchivoSeleccionado(file.name, file.size);
+                }
+            });
+
+            dropZone.addEventListener('dragover', function (e) {
+                e.preventDefault();
+                dropZone.classList.add('drag-zone--active');
+            });
+
+            ['dragleave', 'dragend'].forEach(function (evt) {
+                dropZone.addEventListener(evt, function () {
+                    dropZone.classList.remove('drag-zone--active');
+                });
+            });
+
+            dropZone.addEventListener('drop', function (e) {
+                e.preventDefault();
+                dropZone.classList.remove('drag-zone--active');
+                var files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    // Asignar al input de archivo
+                    var dt = new DataTransfer();
+                    dt.items.add(files[0]);
+                    fileInput.files = dt.files;
+                    mostrarArchivoSeleccionado(files[0].name, files[0].size);
+                }
+            });
+
+            function mostrarArchivoSeleccionado(nombre, bytes) {
+                var mb = (bytes / 1048576).toFixed(2);
+                if (dropTitle) dropTitle.textContent = 'Archivo listo para procesar';
+                if (dropFileName) {
+                    dropFileName.textContent = nombre + ' (' + mb + ' MB)';
+                    dropFileName.classList.remove('hidden');
+                }
+                if (dropIcon) dropIcon.classList.add('drag-zone__icon-wrap--loaded');
+            }
+        })();
+    </script>
+
+</body>
+</html>

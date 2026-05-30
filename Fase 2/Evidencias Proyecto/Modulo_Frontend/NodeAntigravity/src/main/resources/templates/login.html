@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+<head th:replace="~{fragments/layout :: head('Acceso al Sistema', 'login.css')}"></head>
+
+<body class="flux-body">
+
+    <!-- Fondo animado -->
+    <div class="flux-background" id="fluxBackground" aria-hidden="true">
+        <div class="flux-orb" style="top: -100px; left: -100px;"></div>
+        <div class="flux-orb" style="bottom: -200px; right: -100px; animation-delay: -5s;"></div>
+    </div>
+
+    <!-- Top App Bar -->
+    <header class="top-app-bar" role="banner">
+        <div class="top-app-bar__inner">
+            <a th:href="@{/}" class="top-app-bar__brand" aria-label="FLUX TARIFICATION — Inicio">
+                FLUX TARIFICATION
+            </a>
+            <nav class="top-app-bar__nav" aria-label="Navegación principal">
+                <a th:href="@{/soporte}"   class="top-app-bar__nav-link">Support</a>
+                <a th:href="@{/docs}"      class="top-app-bar__nav-link">Documentation</a>
+                <a th:href="@{/normativa}" class="top-app-bar__nav-link">Compliance</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main: Formulario de Login -->
+    <main class="login-main" id="mainContent">
+
+        <div class="login-card glass-card" role="main">
+
+            <!-- Encabezado de la tarjeta -->
+            <div class="login-card__header">
+                <span class="material-symbols-outlined login-card__icon" aria-hidden="true">shield_person</span>
+                <h1 class="login-card__title">Acceso Autorizado</h1>
+                <p class="login-card__subtitle">Sistema de Tarificación y Telemetría</p>
+            </div>
+
+            <!-- Alertas de Spring Security -->
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <!-- Formulario de Autenticación -->
+            <form th:action="@{/login}"
+                  method="POST"
+                  id="loginForm"
+                  class="login-form"
+                  novalidate>
+
+                <!-- Token CSRF de Spring Security -->
+                <input type="hidden"
+                       th:name="${_csrf.parameterName}"
+                       th:value="${_csrf.token}"/>
+
+                <!-- Campo: Usuario -->
+                <div class="form-field" id="fieldUsuario">
+                    <label for="username" class="form-label">Usuario</label>
+                    <div class="input-icon-wrap">
+                        <span class="material-symbols-outlined input-icon" aria-hidden="true">account_circle</span>
+                        <input type="text"
+                               id="username"
+                               name="username"
+                               class="input-underline"
+                               placeholder="ID de operador"
+                               autocomplete="username"
+                               th:value="${#strings.isEmpty(param.username) ? '' : param.username}"
+                               required
+                               aria-required="true"
+                               aria-describedby="usernameHint"/>
+                    </div>
+                    <span id="usernameHint" class="form-hint sr-only">Ingrese su identificador de operador</span>
+                </div>
+
+                <!-- Campo: Contraseña -->
+                <div class="form-field" id="fieldPassword">
+                    <label for="password" class="form-label">Contraseña</label>
+                    <div class="input-icon-wrap">
+                        <span class="material-symbols-outlined input-icon" aria-hidden="true">lock</span>
+                        <input type="password"
+                               id="password"
+                               name="password"
+                               class="input-underline"
+                               placeholder="••••••••"
+                               autocomplete="current-password"
+                               required
+                               aria-required="true"
+                               aria-describedby="passwordHint"/>
+                        <!-- Toggle visibilidad contraseña -->
+                        <button type="button"
+                                class="password-toggle"
+                                id="passwordToggle"
+                                aria-label="Mostrar u ocultar contraseña">
+                            <span class="material-symbols-outlined" id="passwordToggleIcon">visibility_off</span>
+                        </button>
+                    </div>
+                    <span id="passwordHint" class="form-hint sr-only">Ingrese su contraseña</span>
+                </div>
+
+                <!-- Recordar sesión -->
+                <div class="form-field form-field--row">
+                    <label class="checkbox-label" for="rememberMe">
+                        <input type="checkbox"
+                               id="rememberMe"
+                               name="remember-me"
+                               class="checkbox-input"/>
+                        <span class="checkbox-custom"></span>
+                        <span class="checkbox-text">Recordar sesión</span>
+                    </label>
+                </div>
+
+                <!-- Botón principal -->
+                <div class="form-field--submit">
+                    <button type="submit"
+                            class="btn-primary btn-full"
+                            id="btnLogin">
+                        <span class="btn-label">Iniciar Sesión</span>
+                        <span class="btn-loading hidden" aria-hidden="true">
+                            <span class="material-symbols-outlined spin">progress_activity</span>
+                        </span>
+                    </button>
+                </div>
+
+                <!-- Links secundarios -->
+                <div class="login-secondary-links">
+                    <a th:href="@{/recuperar-clave}" class="login-secondary-link">¿Olvidó su clave?</a>
+                    <a th:href="@{/solicitar-acceso}" class="login-secondary-link">Solicitar Acceso</a>
+                </div>
+
+            </form>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer th:replace="~{fragments/layout :: footer-login}"></footer>
+
+    <!-- Scripts de micro-interacciones -->
+    <script th:src="@{/js/login.js}" defer></script>
+
+    <script>
+        // Atmospheric mouse tracking para el gradiente de fondo
+        (function () {
+            const bg = document.getElementById('fluxBackground');
+            if (!bg) return;
+            document.addEventListener('mousemove', function (e) {
+                const x = (e.clientX / window.innerWidth * 100).toFixed(1);
+                const y = (e.clientY / window.innerHeight * 100).toFixed(1);
+                bg.style.background =
+                    'radial-gradient(circle at ' + x + '% ' + y + '%, #111e38 0%, #0c1324 100%)';
+            });
+
+            // Toggle de contraseña
+            const toggle = document.getElementById('passwordToggle');
+            const passInput = document.getElementById('password');
+            const toggleIcon = document.getElementById('passwordToggleIcon');
+            if (toggle && passInput && toggleIcon) {
+                toggle.addEventListener('click', function () {
+                    const isPassword = passInput.type === 'password';
+                    passInput.type = isPassword ? 'text' : 'password';
+                    toggleIcon.textContent = isPassword ? 'visibility' : 'visibility_off';
+                    toggle.setAttribute('aria-label', isPassword ? 'Ocultar contraseña' : 'Mostrar contraseña');
+                });
+            }
+
+            // Focus color de íconos de input
+            document.querySelectorAll('.input-underline').forEach(function (input) {
+                input.addEventListener('focus', function () {
+                    var icon = input.parentElement.querySelector('.input-icon');
+                    if (icon) icon.style.color = 'var(--flux-cyan)';
+                });
+                input.addEventListener('blur', function () {
+                    var icon = input.parentElement.querySelector('.input-icon');
+                    if (icon) icon.style.color = '';
+                });
+            });
+
+            // Loader en submit
+            const form = document.getElementById('loginForm');
+            const btnLabel = document.querySelector('.btn-label');
+            const btnLoading = document.querySelector('.btn-loading');
+            if (form) {
+                form.addEventListener('submit', function () {
+                    if (btnLabel) btnLabel.classList.add('hidden');
+                    if (btnLoading) btnLoading.classList.remove('hidden');
+                });
+            }
+        })();
+    </script>
+
+</body>
+</html>

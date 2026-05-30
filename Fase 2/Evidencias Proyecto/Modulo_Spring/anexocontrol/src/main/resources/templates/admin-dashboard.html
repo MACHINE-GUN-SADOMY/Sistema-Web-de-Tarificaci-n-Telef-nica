@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnexoControl | Panel de Control</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=JetBrains+Mono:wght@100..800&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap">
+    <link rel="stylesheet" th:href="@{/css/layout.css}" href="/css/layout.css">
+    <link rel="stylesheet" th:href="@{/css/admin-dashboard.css}" href="/css/admin-dashboard.css">
+</head>
+<body>
+<div class="app-shell">
+    <aside class="sidebar">
+        <div class="brand">
+            <h1 class="brand-title">AnexoControl</h1>
+            <p class="brand-subtitle">Sistema de Tarificación</p>
+        </div>
+
+        <nav class="nav" aria-label="Navegación principal">
+            <a class="nav-link active" th:href="@{/dashboard}" href="/dashboard"><span class="material-symbols-outlined">dashboard</span><span>Panel Principal</span></a>
+            <a class="nav-link" th:href="@{/reportes}" href="/reportes"><span class="material-symbols-outlined">description</span><span>Solicitud de Reportes</span></a>
+            <a class="nav-link" th:if="${idRolSolicitante == 1}" th:href="@{/usuarios}" href="/usuarios"><span class="material-symbols-outlined">group</span><span>Usuarios</span></a>
+            <a class="nav-link" th:href="@{/cuenta}" href="/cuenta"><span class="material-symbols-outlined">settings</span><span>Configuración</span></a>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <a class="sidebar-cta" th:href="@{/reportes}" href="/reportes"><span class="material-symbols-outlined">add_chart</span><span>Nueva Solicitud</span></a>
+            <a class="nav-link" th:href="@{/login}" href="/login"><span class="material-symbols-outlined">logout</span><span>Cerrar Sesión</span></a>
+        </div>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <div class="search-box">
+                <span class="material-symbols-outlined">search</span>
+                <input class="" type="text" placeholder="Buscar reportes, usuarios..." aria-label="Buscar">
+            </div>
+            <div class="topbar-actions">
+                <a class="icon-button" th:href="@{/cuenta}" href="/cuenta" title="Configuración de cuenta"><span class="material-symbols-outlined">settings</span></a>
+                <div class="user-chip">
+                    <div class="user-chip-text">
+                        <span class="user-name" th:text="${nombreUsuario} ?: 'Administrador'">Administrador</span>
+                        <span class="user-role" th:text="${rolUsuario} ?: 'Sistema'">Sistema</span>
+                    </div>
+                    <div class="avatar-placeholder"><span class="material-symbols-outlined">person</span></div>
+                </div>
+            </div>
+        </header>
+
+        <section class="content">
+            <div class="page-header">
+                <div>
+                    <h2 class="page-title">Panel de Control</h2>
+                    <p class="page-subtitle">Gestión del sistema de tarificación y monitoreo de procesamiento.</p>
+                </div>
+                <div class="actions-row page-actions">
+                    <a class="btn btn-primary" th:href="@{/reportes}" href="/reportes"><span class="material-symbols-outlined">add</span>Nueva Solicitud</a>
+                </div>
+            </div>
+
+            <div class="metrics-grid">
+                <article class="card metric-card">
+                    <div class="metric-header"><span class="material-symbols-outlined metric-icon">analytics</span><span class="metric-tag">Actualizado</span></div>
+                    <p class="metric-title">Reportes Generados</p>
+                    <p class="metric-value" th:text="${totalReportes} ?: '128'">128</p>
+                </article>
+                <article class="card metric-card">
+                    <div class="metric-header"><span class="material-symbols-outlined metric-icon" style="color: var(--yellow);">pending_actions</span><span class="metric-tag" style="color: var(--yellow);">Pendientes</span></div>
+                    <p class="metric-title">Solicitudes Pendientes</p>
+                    <p class="metric-value warning" th:text="${solicitudesPendientes} ?: '07'">07</p>
+                </article>
+                <article class="card metric-card">
+                    <div class="metric-header"><span class="material-symbols-outlined metric-icon" style="color: var(--red);">warning</span><span class="metric-tag" style="color: var(--red);">Crítico</span></div>
+                    <p class="metric-title">Errores de Procesamiento</p>
+                    <p class="metric-value danger" th:text="${erroresProcesamiento} ?: '02'">02</p>
+                </article>
+                <th:block th:if="${idRolSolicitante == 1}"><article class="card metric-card">
+                    <div class="metric-header"><span class="material-symbols-outlined metric-icon">group</span><span class="metric-tag">Sistema</span></div>
+                    <p class="metric-title">Usuarios Registrados</p>
+                    <p class="metric-value cyan" th:text="${usuariosActivos} ?: '0'">0</p>
+                </article>
+</th:block>
+            </div>
+
+            <div class="dashboard-grid" style="grid-template-columns: 1fr;">
+                <article class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><span class="material-symbols-outlined">data_usage</span> Actividad Reciente</h3>
+                        <span class="card-action">Limpiar registro</span>
+                    </div>
+                    <div class="activity-list">
+                        <div class="activity-item" th:each="actividad : ${actividades}">
+                            <span class="activity-dot"></span>
+                            <div>
+                                <p class="" th:text="${actividad.descripcion}">Reporte CSV generado para carga #1040</p>
+                                <div class="activity-meta"><span th:text="${actividad.hora}">10:45 AM</span><span class="mini-badge success" th:text="${actividad.estado}">Éxito</span></div>
+                            </div>
+                        </div>
+                        <div class="activity-item" th:if="${actividades == null}"><span class="activity-dot"></span><div><p class="">Reporte CSV generado para carga #1040</p><div class="activity-meta"><span>10:45 AM</span><span class="mini-badge success">Éxito</span></div></div></div>
+                        <div class="activity-item" th:if="${actividades == null}"><span class="activity-dot"></span><div><p class="">Solicitud #39 completada correctamente</p><div class="activity-meta"><span>09:30 AM</span><span class="mini-badge success">Éxito</span></div></div></div>
+                        <div class="activity-item" th:if="${actividades == null}"><span class="activity-dot muted"></span><div><p class="">Usuario administrador descargó reporte PDF</p><div class="activity-meta"><span>08:15 AM</span><span class="mini-badge success">Info</span></div></div></div>
+                        <div class="activity-item" th:if="${actividades == null}"><span class="activity-dot"></span><div><p class="">Archivo de llamadas procesado sin errores</p><div class="activity-meta"><span>07:00 AM</span><span class="mini-badge success">Éxito</span></div></div></div>
+                    </div>
+                </article>
+            </div>
+
+            <article class="card table-panel">
+                <div class="card-header">
+                    <h3 class="card-title"><span class="material-symbols-outlined">table</span> Últimas Solicitudes de Reporte</h3>
+                    
+                </div>
+                <div class="table-wrap">
+                    <table class="dashboard-table">
+                        <thead>
+                        <tr><th>ID Solicitud</th><th>ID Carga</th><th>Usuario</th><th>Tipo</th><th>Estado</th><th>Fecha</th><th>Acción</th></tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="solicitud : ${solicitudes}">
+                            <td class="table-id" th:text="'#' + ${solicitud.idSolicitud}">#42</td>
+                            <td th:text="${solicitud.idCarga}">1040</td>
+                            <td th:text="${solicitud.idUsuario}">1</td>
+                            <td><span class="type-badge" th:text="${solicitud.idTipoReporte == 1 ? 'PDF' : 'CSV'}">CSV</span></td>
+                            <td><span class="status-badge"
+                                      th:classappend="${solicitud.estadoSolicitado == 'LISTO'} ? ' listo' : (${solicitud.estadoSolicitado == 'ERROR'} ? ' error' : ' pendiente')"
+                                      th:text="${solicitud.estadoSolicitado}">LISTO</span></td>
+                            <td th:text="${solicitud.fechaSolicitud}">27/05/2026</td>
+                            <td>
+                                <a class="table-link"
+                                   th:if="${solicitud.estadoSolicitado == 'LISTO'}"
+                                   th:href="@{/web/descargar/{idSolicitud}(idSolicitud=${solicitud.idSolicitud})}">
+                                    <span class="material-symbols-outlined">download</span>Descargar
+                                </a>
+                                <span class="table-link warning"
+                                      th:if="${solicitud.estadoSolicitado == 'PENDIENTE'}">
+                                    <span class="material-symbols-outlined">hourglass_empty</span>Esperando
+                                </span>
+                                <span class="table-link danger"
+                                      th:if="${solicitud.estadoSolicitado == 'ERROR'}">
+                                    <span class="material-symbols-outlined">error_outline</span>Error
+                                </span>
+                            </td>
+                        </tr>
+                        <tr th:if="${solicitudes == null}"><td>#42</td><td>1040</td><td>admin</td><td><span class="type-badge">CSV</span></td><td><span class="status-badge listo">LISTO</span></td><td>27/05/2026</td><td><a class="table-link" href="#"><span class="material-symbols-outlined">download</span>Descargar</a></td></tr>
+                        <tr th:if="${solicitudes == null}"><td>#41</td><td>1039</td><td>admin</td><td><span class="type-badge">PDF</span></td><td><span class="status-badge listo">LISTO</span></td><td>27/05/2026</td><td><a class="table-link" href="#"><span class="material-symbols-outlined">download</span>Descargar</a></td></tr>
+                        <tr th:if="${solicitudes == null}"><td>#40</td><td>1038</td><td>operador01</td><td><span class="type-badge">CSV</span></td><td><span class="status-badge error">ERROR</span></td><td>26/05/2026</td><td><a class="table-link danger" href="#"><span class="material-symbols-outlined">visibility</span>Ver detalle</a></td></tr>
+                        <tr th:if="${solicitudes == null}"><td>#39</td><td>1037</td><td>admin</td><td><span class="type-badge">PDF</span></td><td><span class="status-badge pendiente">PENDIENTE</span></td><td>26/05/2026</td><td><span class="table-link warning"><span class="material-symbols-outlined">hourglass</span>Esperando</span></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="table-footer"><span>Mostrando solicitudes 1-4 de 1,280 registradas</span><span>›</span></div>
+            </article>
+            <div class="dashboard-footer"><span>● Conexión segura</span><span>● Procesamiento optimizado</span></div>
+        </section>
+    </main>
+</div>
+</body>
+</html>

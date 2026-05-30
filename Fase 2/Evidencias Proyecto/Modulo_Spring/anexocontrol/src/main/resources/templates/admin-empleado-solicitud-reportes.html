@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnexoControl | Solicitud de Reportes</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=JetBrains+Mono:wght@100..800&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap">
+    <link rel="stylesheet" th:href="@{/css/layout.css}" href="/css/layout.css">
+    <link rel="stylesheet" th:href="@{/css/solicitud-reportes.css}" href="/css/solicitud-reportes.css">
+</head>
+<body>
+<div class="app-shell">
+
+    <!-- ===================== SIDEBAR ===================== -->
+    <aside class="sidebar">
+        <div class="brand">
+            <h1 class="brand-title">AnexoControl</h1>
+            <p class="brand-subtitle">Sistema de Tarificación</p>
+        </div>
+
+        <nav class="nav" aria-label="Navegación principal">
+            <a class="nav-link" th:href="@{/dashboard}" href="/dashboard">
+                <span class="material-symbols-outlined">dashboard</span>
+                <span>Panel Principal</span>
+            </a>
+            <a class="nav-link active" th:href="@{/reportes}" href="/reportes">
+                <span class="material-symbols-outlined">description</span>
+                <span>Solicitud de Reportes</span>
+            </a>
+            <a class="nav-link" th:if="${idRolSolicitante == 1}" th:href="@{/usuarios}" href="/usuarios">
+                <span class="material-symbols-outlined">group</span>
+                <span>Usuarios</span>
+            </a>
+            <a class="nav-link" th:href="@{/cuenta}" href="/cuenta">
+                <span class="material-symbols-outlined">settings</span>
+                <span>Configuración</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <a class="sidebar-logout" th:href="@{/login}" href="/login">
+                <span class="material-symbols-outlined">logout</span>Cerrar Sesión
+            </a>
+        </div>
+    </aside>
+
+    <!-- ===================== MAIN ===================== -->
+    <main class="main">
+
+        <!-- TOPBAR -->
+        <header class="topbar">
+            <div class="search-box">
+                <span class="material-symbols-outlined">search</span>
+                <input type="text" placeholder="Buscar reportes..." aria-label="Buscar">
+            </div>
+            <div class="topbar-actions">
+                <a class="icon-button" href="#" aria-label="Notificaciones">
+                    <span class="material-symbols-outlined">notifications</span>
+                </a>
+                <a class="icon-button" th:href="@{/cuenta}" href="/cuenta" aria-label="Configuración">
+                    <span class="material-symbols-outlined">settings</span>
+                </a>
+                <div class="user-chip">
+                    <div class="user-chip-text">
+                        <span class="user-name" th:text="${nombreUsuario} ?: 'Administrador'">Administrador</span>
+                        <span class="user-role" th:text="${rolUsuario} ?: 'Sistema'">Sistema</span>
+                    </div>
+                    <div class="avatar-placeholder">
+                        <span class="material-symbols-outlined">person</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- CONTENT -->
+        <section class="content">
+
+            <!-- Cabecera de página -->
+            <div class="page-header">
+                <div>
+                    <p class="page-kicker">Reportes</p>
+                    <h1 class="page-title">Solicitud de Reportes</h1>
+                    <p class="page-subtitle">Cargue un archivo de llamadas y genere un reporte de tarificación en PDF o CSV.</p>
+                </div>
+            </div>
+
+            <!-- Mensajes de feedback desde el modelo -->
+            <div class="info-box" th:if="${msg}" th:text="${msg}">
+                Operación realizada correctamente.
+            </div>
+            <div class="warning-box" th:if="${error}" th:text="${error}">
+                Ha ocurrido un error.
+            </div>
+
+            <!-- ==================== FORMULARIO ====================
+                 Endpoint: POST /solicitud-reporte/crear-solicitud
+                 Params:   archivo (MultipartFile), idUsuario (Long), idTipoReporte (Integer)
+                 Ref:      SolicitudReporteController#solicitarReporte
+            -->
+            <form class="card form-card"
+                  th:action="@{/web/crear-solicitud}"
+                  action="/web/crear-solicitud"
+                  method="post"
+                  enctype="multipart/form-data">
+
+                <!-- ID del usuario autenticado - oculto -->
+                <input type="hidden" name="idUsuario" th:value="${idUsuario}">
+
+                <h2 class="form-section-title">Nueva Solicitud</h2>
+
+                <div class="form-grid">
+
+                    <!-- Zona de carga de archivo -->
+                    <div class="form-group full">
+                        <span class="form-label">Archivo de Llamadas</span>
+                        <label class="upload-zone" for="archivo">
+                            <span class="material-symbols-outlined upload-zone-icon">upload_file</span>
+                            <p class="upload-zone-title">Seleccione un archivo para procesar</p>
+                            <p class="upload-zone-hint">El archivo se enviará al presionar Solicitar &nbsp;·&nbsp; .csv — .txt &nbsp;·&nbsp; Máx. 25 MB</p>
+                            <input class="upload-zone-input"
+                                   id="archivo"
+                                   name="archivo"
+                                   type="file"
+                                   accept=".csv,.txt"
+                                   required>
+                        </label>
+                    </div>
+
+                    <!-- Selector de tipo de reporte -->
+                    <div class="form-group">
+                        <label class="form-label" for="idTipoReporte">Tipo de Reporte</label>
+                        <select class="form-select" id="idTipoReporte" name="idTipoReporte" required>
+                            <option value="1">Reporte PDF</option>
+                            <option value="2">Reporte CSV</option>
+                        </select>
+                    </div>
+
+                    <!-- Aviso informativo -->
+                    <div class="form-group">
+                        <div class="info-box">
+                            <strong>Información:</strong> El procesamiento puede tardar algunos minutos
+                            según el volumen del archivo. El reporte estará disponible en el historial
+                            una vez que el sistema lo genere.
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="form-actions">
+                    <a class="btn btn-secondary" th:href="@{/dashboard}" href="/dashboard">
+                        Cancelar
+                    </a>
+                    <button class="btn btn-primary" type="submit">
+                        <span class="material-symbols-outlined">bolt</span>
+                        Solicitar Reporte
+                    </button>
+                </div>
+            </form>
+
+            <!-- ==================== HISTORIAL ====================
+                 Variables esperadas del modelo:
+                   - solicitudes : List<SolicitudReporteResponse>
+                   - idUsuario   : Long  (usuario autenticado)
+                   - idRolSolicitante : Long (rol del usuario autenticado)
+                 Ref: SolicitudReporteController#listarPorUsuarioConPermiso
+            -->
+            <div class="card table-panel">
+
+                <div class="table-header">
+                    <h2 class="table-title">
+                        <span class="material-symbols-outlined">history</span>
+                        Mis Solicitudes
+                    </h2>
+                </div>
+
+                <div class="table-wrapper">
+                    <table class="dashboard-table">
+                        <thead>
+                        <tr>
+                            <th>ID Solicitud</th>
+                            <th>ID Carga</th>
+                            <th>Tipo</th>
+                            <th>Estado</th>
+                            <th>Fecha</th>
+                            <th>Acción</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <!-- Filas dinámicas -->
+                        <tr th:each="s : ${solicitudes}">
+                            <td class="table-id" th:text="'#' + ${s.idSolicitud}">#42</td>
+                            <td th:text="${s.idCarga}">1040</td>
+                            <td>
+                                    <span class="type-badge"
+                                          th:text="${s.idTipoReporte == 1 ? 'PDF' : 'CSV'}">CSV</span>
+                            </td>
+                            <td>
+                                    <span class="status-badge"
+                                          th:classappend="${s.estadoSolicitado == 'LISTO'}   ? ' listo'     :
+                                                          (${s.estadoSolicitado == 'ERROR'}   ? ' error'     :
+                                                                                                ' pendiente')"
+                                          th:text="${s.estadoSolicitado}">LISTO</span>
+                            </td>
+                            <td th:text="${s.fechaSolicitud}">27/05/2026</td>
+                            <td>
+                                <!-- LISTO → descargar
+                                     Endpoint: GET /solicitud-reporte/{idSolicitud}/descargar
+                                     Ref: SolicitudReporteController#descargarReporte -->
+                                <a class="table-link"
+                                   th:if="${s.estadoSolicitado == 'LISTO'}"
+                                   th:href="@{/web/descargar/{idSolicitud}(idSolicitud=${s.idSolicitud})}">
+                                    <span class="material-symbols-outlined">download</span>Descargar
+                                </a>
+                                <!-- PENDIENTE → sin acción -->
+                                <span class="table-link warning"
+                                      th:if="${s.estadoSolicitado == 'PENDIENTE'}">
+                                        <span class="material-symbols-outlined">hourglass_empty</span>Procesando
+                                    </span>
+                                <!-- ERROR → ver detalle
+                                     Endpoint: GET /solicitud-reporte/obtener-solicitud/{id}
+                                     Ref: SolicitudReporteController#obtenerPorId -->
+                                <a class="table-link danger"
+                                   th:if="${s.estadoSolicitado == 'ERROR'}"
+                                   th:href="@{/solicitud-reporte/obtener-solicitud/{id}(id=${s.idSolicitud},
+                                                  idUsuarioSolicitante=${idUsuario},
+                                                  idRolSolicitante=${idRolSolicitante})}">
+                                    <span class="material-symbols-outlined">visibility</span>Ver detalle
+                                </a>
+                            </td>
+                        </tr>
+
+                        <!-- Fila vacía si no hay solicitudes -->
+                        <tr th:if="${solicitudes == null or #lists.isEmpty(solicitudes)}">
+                            <td colspan="6" class="table-empty">
+                                <span class="material-symbols-outlined">inbox</span>
+                                No hay solicitudes registradas aún.
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="table-footer">
+                    <span th:if="${solicitudes != null and not #lists.isEmpty(solicitudes)}"
+                          th:text="'Mostrando ' + ${#lists.size(solicitudes)} + ' solicitudes'">
+                        Mostrando 0 solicitudes
+                    </span>
+                </div>
+
+            </div>
+
+            <p class="form-footer-note">AnexoControl · Sistema de Tarificación</p>
+
+        </section>
+    </main>
+</div>
+</body>
+</html>

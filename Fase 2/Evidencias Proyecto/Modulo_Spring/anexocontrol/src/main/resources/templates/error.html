@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnexoControl | Error</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=JetBrains+Mono:wght@100..800&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap">
+    <link rel="stylesheet" th:href="@{/css/layout.css}"     href="/css/layout.css">
+    <link rel="stylesheet" th:href="@{/css/auth-pages.css}" href="/css/auth-pages.css">
+</head>
+<body class="auth-page">
+
+<section class="auth-card" style="text-align: center;">
+
+    <!-- Icono de error -->
+    <span class="material-symbols-outlined"
+          style="font-size: 48px; color: var(--red); margin-bottom: 16px; display: block;">
+        error_outline
+    </span>
+
+    <!-- Título -->
+    <h1 class="auth-title"
+        style="color: var(--red); font-size: 24px; margin-bottom: 8px;"
+        th:text="${tituloError} ?: 'Error'">
+        Error
+    </h1>
+
+    <!-- Badge de estado -->
+    <p class="auth-subtitle"
+       style="color: var(--red); opacity: 0.9;"
+       th:text="${estadoError} ?: 'ERROR'">
+        ERROR
+    </p>
+
+    <!-- Línea separadora -->
+    <div style="height: 1px; background: rgba(255,123,134,0.25); margin: 20px 0;"></div>
+
+    <!-- Mensaje descriptivo -->
+    <p style="color: var(--text); opacity: 0.88; line-height: 1.65; font-size: 15px; margin: 0 0 28px;"
+       th:text="${mensajeError} ?: 'Ha ocurrido un error. Intenta nuevamente.'">
+        Ha ocurrido un error. Intenta nuevamente.
+    </p>
+
+    <!-- Botón volver -->
+    <a class="btn btn-secondary"
+       style="width: 100%; justify-content: center;"
+       th:href="${urlVolver} ?: '/reportes'"
+       href="/reportes">
+        <span class="material-symbols-outlined">arrow_back</span>
+        Volver
+    </a>
+
+    <!-- Marca -->
+    <p style="margin-top: 24px; color: var(--muted-2);
+              font-family: 'JetBrains Mono', monospace;
+              font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;">
+        AnexoControl · Sistema de Tarificación
+    </p>
+
+</section>
+</body>
+</html>

@@ -1,0 +1,338 @@
+/* ==========================================================================
+   FLUX TARIFICATION — login.css
+   Estilos exclusivos de la página de acceso al sistema
+   Depende de: flux-main.css (tokens y base)
+   ========================================================================== */
+
+/* ============================================================
+   1. FONDO ANIMADO — LOGIN
+   ============================================================ */
+.flux-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    background: radial-gradient(circle at 50% 50%, #0f172a 0%, #0c1324 100%);
+    overflow: hidden;
+    transition: background 0.6s ease;
+}
+
+/* Orbes de profundidad */
+.flux-orb {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(
+        circle,
+        rgba(0, 240, 255, 0.04) 0%,
+        transparent 70%
+    );
+    border-radius: 50%;
+    filter: blur(80px);
+    animation: floatOrb 20s infinite alternate ease-in-out;
+    pointer-events: none;
+}
+
+@keyframes floatOrb {
+    0%   { transform: translate(-10%, -10%) scale(1); }
+    50%  { transform: translate(10%, 5%)   scale(1.05); }
+    100% { transform: translate(20%, 10%)  scale(1.10); }
+}
+
+/* Partícula decorativa sutil */
+.flux-background::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+        radial-gradient(1px 1px at 20% 30%, rgba(0, 240, 255, 0.08) 0%, transparent 100%),
+        radial-gradient(1px 1px at 80% 70%, rgba(0, 219, 233, 0.06) 0%, transparent 100%),
+        radial-gradient(1px 1px at 50% 10%, rgba(123, 244, 255, 0.05) 0%, transparent 100%);
+    pointer-events: none;
+}
+
+/* ============================================================
+   2. LAYOUT PRINCIPAL DEL LOGIN
+   ============================================================ */
+.login-main {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-md);
+    /* Compensar el top-app-bar fijo */
+    padding-top: calc(72px + var(--space-md));
+    padding-bottom: calc(80px + var(--space-md));
+}
+
+/* ============================================================
+   3. TARJETA DE LOGIN (Glassmorphism)
+   ============================================================ */
+.login-card {
+    width: 100%;
+    max-width: 440px;
+    padding: var(--space-xl);
+    border-radius: var(--radius-lg);
+    /* Animación de entrada */
+    animation: cardEntrance 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    /* Posición para efecto glow relativo */
+    position: relative;
+    overflow: hidden;
+}
+
+@keyframes cardEntrance {
+    from {
+        opacity: 0;
+        transform: translateY(24px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Glow superior decorativo */
+.login-card::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(0, 240, 255, 0.50),
+        transparent
+    );
+    pointer-events: none;
+}
+
+/* ============================================================
+   4. HEADER DE LA TARJETA
+   ============================================================ */
+.login-card__header {
+    margin-bottom: var(--space-xxl);
+    text-align: center;
+}
+
+.login-card__icon {
+    display: block;
+    font-size: 48px;
+    color: var(--clr-primary-container);
+    margin-bottom: var(--space-md);
+    /* Animación de pulso suave */
+    animation: iconPulse 3s ease-in-out infinite;
+}
+
+@keyframes iconPulse {
+    0%, 100% {
+        filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.20));
+        transform: scale(1);
+    }
+    50% {
+        filter: drop-shadow(0 0 16px rgba(0, 240, 255, 0.40));
+        transform: scale(1.04);
+    }
+}
+
+.login-card__title {
+    font-family: var(--font-sans);
+    font-size: var(--fz-headline-lg);
+    font-weight: 600;
+    color: var(--clr-primary);
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+    margin-bottom: var(--space-xs);
+}
+
+.login-card__subtitle {
+    font-family: var(--font-sans);
+    font-size: var(--fz-body-md);
+    color: var(--clr-on-tertiary-container);
+    opacity: 0.70;
+}
+
+/* ============================================================
+   5. FORMULARIO DE LOGIN
+   ============================================================ */
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+}
+
+/* ── Área de submit ── */
+.form-field--submit {
+    padding-top: var(--space-md);
+}
+
+/* ── Links secundarios ── */
+.login-secondary-links {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: var(--space-lg);
+    opacity: 0.60;
+    transition: opacity var(--dur-base) ease;
+}
+
+.login-secondary-links:hover { opacity: 1; }
+
+.login-secondary-link {
+    font-family: var(--font-mono);
+    font-size: var(--fz-label);
+    letter-spacing: 0.05em;
+    color: var(--clr-on-surface);
+    transition: color var(--dur-base) ease;
+    padding: var(--space-xs) 0;
+    position: relative;
+}
+
+.login-secondary-link::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 0;
+    height: 1px;
+    background: var(--flux-cyan);
+    transition: width var(--dur-slow) ease;
+}
+
+.login-secondary-link:hover::after { width: 100%; }
+.login-secondary-link:hover { color: var(--clr-primary-fixed); opacity: 1; }
+
+/* ============================================================
+   6. OVERRIDE DEL INPUT UNDERLINE PARA LOGIN
+   ============================================================ */
+
+/* Ajuste de padding izquierdo (espacio para el ícono) */
+.login-form .input-underline {
+    padding-left: var(--space-lg);
+    /* Fuerza de color en modo focus */
+    caret-color: var(--flux-cyan);
+}
+
+/* ── Estado de error específico del login ── */
+.login-form .input-underline.input--error {
+    border-bottom-color: var(--clr-error);
+    color: var(--clr-error);
+}
+
+/* ── Transición suave al focus del input y su ícono ── */
+.input-icon-wrap:focus-within .input-icon {
+    color: var(--flux-cyan);
+}
+
+/* ============================================================
+   7. BOTÓN DE LOGIN — Sobreescritura específica
+   ============================================================ */
+.login-form .btn-primary {
+    padding: var(--space-md);
+    letter-spacing: 0.15em;
+    font-size: 13px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Shimmer en hover */
+.login-form .btn-primary::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.12),
+        transparent
+    );
+    transition: left var(--dur-slow) ease;
+}
+
+.login-form .btn-primary:hover::after { left: 100%; }
+
+/* ============================================================
+   8. LOADING STATE DEL BOTÓN
+   ============================================================ */
+.btn-loading {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-family: var(--font-mono);
+    font-size: var(--fz-label);
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+}
+
+/* ============================================================
+   9. SEPARADOR CON TEXTO (opcional — reutilizable)
+   ============================================================ */
+.divider-text {
+    position: relative;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: var(--fz-label);
+    letter-spacing: 0.08em;
+    color: var(--clr-on-surface-variant);
+    opacity: 0.50;
+}
+
+.divider-text::before,
+.divider-text::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 40%;
+    height: 1px;
+    background: var(--glass-border);
+}
+
+.divider-text::before { left: 0; }
+.divider-text::after  { right: 0; }
+
+/* ============================================================
+   10. INDICADORES DE FUERZA DE CONTRASEÑA
+   ============================================================ */
+.password-strength {
+    display: flex;
+    gap: 4px;
+    margin-top: var(--space-xs);
+}
+
+.strength-bar {
+    flex: 1;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--clr-outline-variant);
+    transition: background-color var(--dur-slow) ease;
+}
+
+.strength-bar--weak   { background: var(--clr-error); }
+.strength-bar--medium { background: #f59e0b; }
+.strength-bar--strong { background: var(--clr-primary-fixed-dim); }
+
+/* ============================================================
+   11. RESPONSIVE — MOBILE
+   ============================================================ */
+@media (max-width: 480px) {
+    .login-main { padding: var(--space-sm); padding-top: 80px; padding-bottom: 80px; }
+    .login-card { padding: var(--space-lg); }
+    .login-card__title { font-size: 24px; }
+    .login-card__icon  { font-size: 40px; }
+    .login-secondary-links { flex-direction: column; gap: var(--space-sm); align-items: flex-start; }
+
+    .top-app-bar__inner { padding: var(--space-md); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .flux-orb { animation: none; }
+    .login-card { animation: none; }
+    .login-card__icon { animation: none; }
+}

@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+
+<head th:replace="~{fragments/layout :: head('Admin Dashboard', 'admin-dashboard.css')}"></head>
+
+<body class="flux-body flux-body--dashboard">
+
+    <!-- Fondo animado del dashboard -->
+    <div class="flux-bg" aria-hidden="true"></div>
+
+    <!-- ============================================================
+         SIDEBAR ADMINISTRATIVO
+         Pasamos la sección activa desde el controlador: activeSection
+         ============================================================ -->
+    <div th:replace="~{fragments/layout :: sidebar-admin(${activeSection ?: 'usuarios'})}"></div>
+
+    <!-- ============================================================
+         ÁREA PRINCIPAL (desplazada por el sidebar de 256px)
+         ============================================================ -->
+    <main class="admin-main ml-64 min-h-screen flex flex-col" id="mainContent">
+
+        <!-- TOP BAR -->
+        <div th:replace="~{fragments/layout :: topbar-admin}"></div>
+
+        <!-- ============================================================
+             CONTENIDO DEL DASHBOARD
+             ============================================================ -->
+        <section class="dashboard-content p-xl flex-1" aria-label="Área de administración de usuarios">
+
+            <!-- Alertas globales -->
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <!-- Encabezado de página -->
+            <div class="page-header" role="heading" aria-level="1">
+                <div class="page-header__text">
+                    <h2 class="page-header__title">Administración de Usuarios</h2>
+                    <p class="page-header__subtitle">
+                        Gestione los accesos, roles y permisos de los operadores del sistema.
+                    </p>
+                </div>
+                <button type="button"
+                        class="btn-primary btn-icon"
+                        id="btnOpenModal"
+                        onclick="openModal()"
+                        aria-haspopup="dialog"
+                        aria-controls="userModal">
+                    <span class="material-symbols-outlined" aria-hidden="true">person_add</span>
+                    Registrar Usuario
+                </button>
+            </div>
+
+            <!-- ================================================
+                 STATS GRID (datos venidos del modelo Spring)
+                 Variables esperadas: totalUsuarios, sesionesActivas,
+                                      rolesDefinidos, alertasAcceso
+                 ================================================ -->
+            <div class="stats-grid" role="region" aria-label="Resumen estadístico">
+
+                <!-- Stat: Total Usuarios -->
+                <article class="stat-card glass-panel" id="statTotalUsuarios">
+                    <p class="stat-card__label">Total Usuarios</p>
+                    <p class="stat-card__value stat-card__value--primary"
+                       th:text="${totalUsuarios != null ? #numbers.formatInteger(totalUsuarios, 1, 'COMMA') : '—'}">
+                        1,284
+                    </p>
+                    <div class="stat-card__trend stat-card__trend--up">
+                        <span class="material-symbols-outlined" aria-hidden="true">trending_up</span>
+                        <span th:text="${tendenciaMes != null ? tendenciaMes : '+12% este mes'}">+12% este mes</span>
+                    </div>
+                </article>
+
+                <!-- Stat: Sesiones Activas -->
+                <article class="stat-card glass-panel" id="statSesiones">
+                    <p class="stat-card__label">Sesiones Activas</p>
+                    <p class="stat-card__value stat-card__value--secondary"
+                       th:text="${sesionesActivas != null ? sesionesActivas : '—'}">
+                        42
+                    </p>
+                    <div class="stat-card__trend">
+                        <span class="material-symbols-outlined" aria-hidden="true">fiber_manual_record</span>
+                        <span>Tiempo real</span>
+                    </div>
+                </article>
+
+                <!-- Stat: Roles Definidos -->
+                <article class="stat-card glass-panel" id="statRoles">
+                    <p class="stat-card__label">Roles Definidos</p>
+                    <p class="stat-card__value"
+                       th:text="${rolesDefinidos != null ? #strings.leftPad(rolesDefinidos.toString(), 2, '0') : '—'}">
+                        06
+                    </p>
+                    <div class="stat-card__trend">
+                        <span class="material-symbols-outlined" aria-hidden="true">security</span>
+                        <span>Permisos auditados</span>
+                    </div>
+                </article>
+
+                <!-- Stat: Alertas de Acceso -->
+                <article class="stat-card glass-panel" id="statAlertas">
+                    <p class="stat-card__label">Alertas de Acceso</p>
+                    <p class="stat-card__value stat-card__value--error"
+                       th:text="${alertasAcceso != null ? #strings.leftPad(alertasAcceso.toString(), 2, '0') : '—'}">
+                        02
+                    </p>
+                    <div class="stat-card__trend stat-card__trend--danger">
+                        <span class="material-symbols-outlined" aria-hidden="true">warning</span>
+                        <span>Revisión requerida</span>
+                    </div>
+                </article>
+
+            </div>
+            <!-- /STATS GRID -->
+
+            <!-- ================================================
+                 TABLA DE USUARIOS
+                 Variable esperada: usuarios (List<UsuarioDTO>)
+                 UsuarioDTO: id, codigoFlux, nombre, email,
+                             estado (ACTIVO|SUSPENDIDO|INACTIVO),
+                             rol, inicialesAvatar, colorAvatar
+                 ================================================ -->
+            <div class="data-table-container glass-panel" role="region" aria-label="Listado de usuarios">
+
+                <!-- Header de la tabla -->
+                <div class="data-table__header">
+                    <h3 class="data-table__title">Listado de Personal</h3>
+                    <div class="data-table__actions">
+                        <button type="button"
+                                class="material-symbols-outlined icon-btn"
+                                id="btnFiltrar"
+                                aria-label="Filtrar tabla"
+                                title="Filtrar">filter_list</button>
+                        <button type="button"
+                                class="material-symbols-outlined icon-btn"
+                                id="btnExportar"
+                                aria-label="Exportar datos"
+                                title="Exportar"
+                                onclick="exportarUsuarios()">download</button>
+                    </div>
+                </div>
+
+                <!-- Tabla responsiva -->
+                <div class="overflow-x-auto">
+                    <table class="data-table" aria-label="Tabla de usuarios del sistema">
+                        <thead>
+                            <tr class="data-table__head-row">
+                                <th class="data-table__th" scope="col">ID</th>
+                                <th class="data-table__th" scope="col">Usuario</th>
+                                <th class="data-table__th" scope="col">Estado</th>
+                                <th class="data-table__th" scope="col">Rol</th>
+                                <th class="data-table__th data-table__th--right" scope="col">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaUsuariosBody">
+
+                            <!-- Fila vacía si no hay usuarios -->
+                            <tr th:if="${#lists.isEmpty(usuarios)}" class="data-table__row">
+                                <td colspan="5" class="data-table__td data-table__td--empty">
+                                    <span class="material-symbols-outlined" aria-hidden="true">group_off</span>
+                                    <span>No se encontraron usuarios registrados.</span>
+                                </td>
+                            </tr>
+
+                            <!-- Iteración de usuarios -->
+                            <tr th:each="usuario : ${usuarios}"
+                                th:id="'row-' + ${usuario.id}"
+                                class="data-table__row">
+
+                                <!-- Código FLUX -->
+                                <td class="data-table__td data-table__td--code"
+                                    th:text="${usuario.codigoFlux}">
+                                    #FLX-001
+                                </td>
+
+                                <!-- Nombre y email -->
+                                <td class="data-table__td">
+                                    <div class="user-cell">
+                                        <div class="user-avatar"
+                                             th:style="'background-color: ' + (${usuario.colorAvatar} ?: 'rgba(0,219,233,0.1)') + '; color: ' + (${usuario.colorAvatarText} ?: '#00dbe9')"
+                                             th:text="${usuario.inicialesAvatar}"
+                                             aria-hidden="true">
+                                            ??
+                                        </div>
+                                        <div>
+                                            <p class="user-cell__name"
+                                               th:text="${usuario.nombre + ' ' + usuario.apellido}">
+                                                Nombre Apellido
+                                            </p>
+                                            <p class="user-cell__email" th:text="${usuario.email}">
+                                                correo@flux.tech
+                                            </p>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Estado con badge dinámico -->
+                                <td class="data-table__td">
+                                    <span th:text="${usuario.estado}"
+                                          th:classappend="${usuario.estado == 'ACTIVO'} ? ' badge--activo' :
+                                                          (${usuario.estado == 'SUSPENDIDO'} ? ' badge--suspendido' : ' badge--inactivo')"
+                                          class="badge">
+                                        ACTIVO
+                                    </span>
+                                </td>
+
+                                <!-- Rol -->
+                                <td class="data-table__td data-table__td--role"
+                                    th:text="${usuario.rol}">
+                                    Operador
+                                </td>
+
+                                <!-- Botones de acción -->
+                                <td class="data-table__td data-table__td--actions">
+                                    <button type="button"
+                                            class="material-symbols-outlined action-btn action-btn--edit"
+                                            th:attr="data-id=${usuario.id},
+                                                     aria-label='Editar usuario ' + ${usuario.nombre}"
+                                            title="Editar"
+                                            onclick="editarUsuario(this)">edit</button>
+                                    <button type="button"
+                                            class="material-symbols-outlined action-btn action-btn--delete"
+                                            th:attr="data-id=${usuario.id},
+                                                     aria-label='Eliminar usuario ' + ${usuario.nombre}"
+                                            title="Eliminar"
+                                            onclick="confirmarEliminar(this)">delete</button>
+                                </td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Paginación -->
+                <div class="data-table__pagination" role="navigation" aria-label="Paginación">
+                    <p class="pagination__info"
+                       th:text="'Mostrando ' + ${usuarios != null ? usuarios.size() : 0} + ' de ' + (${totalUsuarios != null ? #numbers.formatInteger(totalUsuarios, 1, 'COMMA') : '?'}) + ' usuarios'">
+                        Mostrando N de 0 usuarios
+                    </p>
+                    <div class="pagination__controls">
+                        <a th:href="@{/admin/usuarios(page=${currentPage > 0 ? currentPage - 1 : 0})}"
+                           class="material-symbols-outlined icon-btn"
+                           th:classappend="${currentPage == 0} ? ' icon-btn--disabled' : ''"
+                           aria-label="Página anterior">chevron_left</a>
+                        <a th:href="@{/admin/usuarios(page=${currentPage + 1})}"
+                           class="material-symbols-outlined icon-btn"
+                           th:classappend="${!hasNextPage} ? ' icon-btn--disabled' : ''"
+                           aria-label="Página siguiente">chevron_right</a>
+                    </div>
+                </div>
+
+            </div>
+            <!-- /TABLA DE USUARIOS -->
+
+        </section>
+        <!-- /CONTENIDO DEL DASHBOARD -->
+
+    </main>
+    <!-- /ÁREA PRINCIPAL -->
+
+    <!-- ============================================================
+         MODAL: REGISTRAR / EDITAR USUARIO
+         ============================================================ -->
+    <div class="modal-overlay"
+         id="userModal"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="modalTitle"
+         hidden>
+
+        <!-- Fondo semitransparente -->
+        <div class="modal-backdrop" onclick="closeModal()" aria-hidden="true"></div>
+
+        <!-- Contenido del modal -->
+        <div class="modal-content glass-panel" id="modalContent">
+
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Nuevo Registro</h3>
+                <button type="button"
+                        class="material-symbols-outlined modal-close"
+                        onclick="closeModal()"
+                        aria-label="Cerrar modal">close</button>
+            </div>
+
+            <!-- Modal Form -->
+            <form th:action="@{/admin/usuarios/guardar}"
+                  th:object="${usuarioForm}"
+                  method="POST"
+                  id="userForm"
+                  class="modal-form"
+                  novalidate>
+
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <!-- Campo oculto para modo edición -->
+                <input type="hidden" th:field="*{id}" id="modalUserId"/>
+
+                <div class="modal-grid">
+                    <!-- Nombres -->
+                    <div class="form-field" id="modalFieldNombre">
+                        <label for="modalNombre" class="form-label">Nombres</label>
+                        <input type="text"
+                               id="modalNombre"
+                               th:field="*{nombre}"
+                               class="input-base"
+                               th:classappend="${#fields.hasErrors('nombre')} ? ' input--error'"
+                               placeholder="Ej: Juan Carlos"
+                               autocomplete="given-name"
+                               required/>
+                        <p class="field-error"
+                           th:if="${#fields.hasErrors('nombre')}"
+                           th:errors="*{nombre}">Error en nombres</p>
+                    </div>
+
+                    <!-- Apellidos -->
+                    <div class="form-field" id="modalFieldApellido">
+                        <label for="modalApellido" class="form-label">Apellidos</label>
+                        <input type="text"
+                               id="modalApellido"
+                               th:field="*{apellido}"
+                               class="input-base"
+                               th:classappend="${#fields.hasErrors('apellido')} ? ' input--error'"
+                               placeholder="Ej: Pérez García"
+                               autocomplete="family-name"
+                               required/>
+                        <p class="field-error"
+                           th:if="${#fields.hasErrors('apellido')}"
+                           th:errors="*{apellido}">Error en apellidos</p>
+                    </div>
+                </div>
+
+                <!-- Email Institucional -->
+                <div class="form-field" id="modalFieldEmail">
+                    <label for="modalEmail" class="form-label">Email Institucional</label>
+                    <input type="email"
+                           id="modalEmail"
+                           th:field="*{email}"
+                           class="input-base"
+                           th:classappend="${#fields.hasErrors('email')} ? ' input--error'"
+                           placeholder="operador@flux.tech"
+                           autocomplete="email"
+                           required/>
+                    <p class="field-error"
+                       th:if="${#fields.hasErrors('email')}"
+                       th:errors="*{email}">Error en email</p>
+                </div>
+
+                <!-- Rol de Sistema -->
+                <div class="form-field" id="modalFieldRol">
+                    <label for="modalRol" class="form-label">Rol de Sistema</label>
+                    <select id="modalRol"
+                            th:field="*{rol}"
+                            class="input-base"
+                            th:classappend="${#fields.hasErrors('rol')} ? ' input--error'"
+                            required>
+                        <option value="" disabled>Seleccione un rol...</option>
+                        <option th:each="rol : ${rolesDisponibles}"
+                                th:value="${rol.value}"
+                                th:text="${rol.label}">
+                            Operador de Sistema
+                        </option>
+                    </select>
+                    <p class="field-error"
+                       th:if="${#fields.hasErrors('rol')}"
+                       th:errors="*{rol}">Error en rol</p>
+                </div>
+
+                <!-- Contraseña (solo en modo creación) -->
+                <div class="form-field" id="modalFieldPassword"
+                     th:unless="${usuarioForm != null and usuarioForm.id != null}">
+                    <label for="modalPassword" class="form-label">Contraseña Temporal</label>
+                    <input type="password"
+                           id="modalPassword"
+                           th:field="*{passwordTemporal}"
+                           class="input-base"
+                           th:classappend="${#fields.hasErrors('passwordTemporal')} ? ' input--error'"
+                           placeholder="Mínimo 8 caracteres"
+                           autocomplete="new-password"/>
+                    <p class="field-error"
+                       th:if="${#fields.hasErrors('passwordTemporal')}"
+                       th:errors="*{passwordTemporal}">Error en contraseña</p>
+                </div>
+
+                <!-- Acciones del modal -->
+                <div class="modal-actions">
+                    <button type="button"
+                            class="btn-ghost"
+                            onclick="closeModal()"
+                            id="btnCancelarModal">Cancelar</button>
+                    <button type="submit"
+                            class="btn-primary btn-icon"
+                            id="btnGuardarUsuario">
+                        <span class="material-symbols-outlined" aria-hidden="true">save</span>
+                        Guardar Usuario
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+    <!-- /MODAL -->
+
+    <!-- ============================================================
+         DIALOG: CONFIRMAR ELIMINACIÓN
+         ============================================================ -->
+    <div class="modal-overlay"
+         id="deleteModal"
+         role="alertdialog"
+         aria-modal="true"
+         aria-labelledby="deleteModalTitle"
+         hidden>
+        <div class="modal-backdrop" onclick="closeDeleteModal()" aria-hidden="true"></div>
+        <div class="modal-content modal-content--sm glass-panel" id="deleteModalContent">
+            <div class="modal-header">
+                <h3 class="modal-title modal-title--danger" id="deleteModalTitle">
+                    <span class="material-symbols-outlined" aria-hidden="true">warning</span>
+                    Confirmar Eliminación
+                </h3>
+            </div>
+            <p class="delete-confirm-text">
+                ¿Está seguro de que desea eliminar al usuario
+                <strong id="deleteUsuarioNombre">este usuario</strong>?
+                Esta acción no se puede deshacer.
+            </p>
+            <div class="modal-actions">
+                <button type="button" class="btn-ghost" onclick="closeDeleteModal()">Cancelar</button>
+                <form th:action="@{/admin/usuarios/eliminar}" method="POST" id="deleteForm">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <input type="hidden" name="id" id="deleteUsuarioId"/>
+                    <button type="submit" class="btn-danger" id="btnConfirmarEliminar">
+                        <span class="material-symbols-outlined" aria-hidden="true">delete_forever</span>
+                        Eliminar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- /DELETE DIALOG -->
+
+    <!-- Scripts -->
+    <script th:src="@{/js/admin-dashboard.js}" defer></script>
+
+    <script>
+        /* =====================================================
+           Lógica de Modal (inline — independiente del bundle)
+           ===================================================== */
+        function openModal(id, nombre, apellido, email, rol) {
+            const modal = document.getElementById('userModal');
+            const content = document.getElementById('modalContent');
+
+            // Si recibimos datos = modo edición
+            if (id !== undefined) {
+                document.getElementById('modalTitle').textContent = 'Editar Usuario';
+                document.getElementById('modalUserId').value = id;
+                document.getElementById('modalNombre').value = nombre || '';
+                document.getElementById('modalApellido').value = apellido || '';
+                document.getElementById('modalEmail').value = email || '';
+                document.getElementById('modalRol').value = rol || '';
+                // Ocultar campo de contraseña en modo edición
+                const passField = document.getElementById('modalFieldPassword');
+                if (passField) passField.style.display = 'none';
+            } else {
+                document.getElementById('modalTitle').textContent = 'Nuevo Registro';
+                document.getElementById('userForm').reset();
+                document.getElementById('modalUserId').value = '';
+                const passField = document.getElementById('modalFieldPassword');
+                if (passField) passField.style.display = '';
+            }
+
+            modal.removeAttribute('hidden');
+            requestAnimationFrame(function () {
+                content.classList.add('modal-content--visible');
+            });
+            // Foco accesible
+            content.querySelector('input:not([type=hidden])').focus();
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('userModal');
+            const content = document.getElementById('modalContent');
+            content.classList.remove('modal-content--visible');
+            setTimeout(function () { modal.setAttribute('hidden', ''); }, 300);
+        }
+
+        function editarUsuario(btn) {
+            openModal(
+                btn.dataset.id,
+                btn.dataset.nombre,
+                btn.dataset.apellido,
+                btn.dataset.email,
+                btn.dataset.rol
+            );
+        }
+
+        function confirmarEliminar(btn) {
+            const modal = document.getElementById('deleteModal');
+            const content = document.getElementById('deleteModalContent');
+            document.getElementById('deleteUsuarioId').value = btn.dataset.id;
+            document.getElementById('deleteUsuarioNombre').textContent = btn.dataset.nombre || btn.dataset.id;
+            modal.removeAttribute('hidden');
+            requestAnimationFrame(function () { content.classList.add('modal-content--visible'); });
+        }
+
+        function closeDeleteModal() {
+            const modal = document.getElementById('deleteModal');
+            const content = document.getElementById('deleteModalContent');
+            content.classList.remove('modal-content--visible');
+            setTimeout(function () { modal.setAttribute('hidden', ''); }, 300);
+        }
+
+        // Cerrar modales con Escape
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                closeModal();
+                closeDeleteModal();
+            }
+        });
+
+        // Micro-interacción hover en glass-panels
+        document.querySelectorAll('.glass-panel').forEach(function (card) {
+            card.addEventListener('mousemove', function (e) {
+                var rect = card.getBoundingClientRect();
+                card.style.setProperty('--mouse-x', (e.clientX - rect.left) + 'px');
+                card.style.setProperty('--mouse-y', (e.clientY - rect.top) + 'px');
+            });
+        });
+
+        // Función de exportar (placeholder)
+        function exportarUsuarios() {
+            window.location.href = '/admin/usuarios/exportar';
+        }
+    </script>
+
+</body>
+</html>

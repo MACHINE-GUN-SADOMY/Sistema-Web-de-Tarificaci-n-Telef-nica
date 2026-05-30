@@ -1,7 +1,7 @@
 import os
 import csv
 
-from django.utils.lorem_ipsum import paragraph
+
 from rest_framework import serializers
 from django.conf import settings
 from rest_framework.exceptions import ValidationError
@@ -99,69 +99,99 @@ class GeneradorReportesService:
         nombre_archivo = f"reporte_carga_{idCarga}.pdf"
         ruta_reporte = os.path.join(carpeta_reportes, nombre_archivo)
 
-        # se crea el documento base
+        # landscape(letter) = 792 x 612 pts
+        # margen 36pt cada lado → ancho util = 720pt
+        # colWidths suma exacta: 70+40+62+72+58+58+58+62+58+62+70 = 670 (holgura para padding)
+        col_widths = [70, 40, 62, 72, 58, 58, 58, 62, 58, 62, 70]
+
+        # se crea el documento con margenes reducidos para maximizar espacio de tabla
         documento = SimpleDocTemplate(
             ruta_reporte,
-            pagesize=landscape(letter)
+            pagesize=landscape(letter),
+            leftMargin=36,
+            rightMargin=36,
+            topMargin=36,
+            bottomMargin=36
         )
 
-        # se obtienen los estilos por defecto
+        # estilos para wrap de texto dentro de celdas
         estilos = getSampleStyleSheet()
+        estilo_celda = estilos["Normal"]
+        estilo_celda.fontSize = 7
+        estilo_celda.leading = 9    # interlineado compacto
+        estilo_celda.wordWrap = "LTR"
+
+        estilo_header = estilos["Normal"].clone("header_cell")
+        estilo_header.fontSize = 7
+        estilo_header.leading = 9
+        estilo_header.fontName = "Helvetica-Bold"
+        estilo_header.wordWrap = "LTR"
+
         elementos = []
 
-        # se crea el titulo del reporte
+        # titulo del reporte
         titulo = Paragraph(f"Reporte de Tarificación - Carga {idCarga}", estilos["Title"])
-
         elementos.append(titulo)
-        elementos.append(Spacer(1,12))
+        elementos.append(Spacer(1, 10))
 
-        # se ejecuta solo una vez para definir titulos de columna
-        datos_tabla = [
-            [
-                "Usuario",
-                "Anexo",
-                "Proveedor",
-                "Tipo de Llamada",
-                "Duración Total (segundos)",
-                "Cantidad de Llamadas del Usuario",
-                "Cantidad Total de Llamadas",
-                "Tiempo Total de la Carga (segundos)",
-                "Promedio de Duración (segundos)",
-                "Costo Calculado",
-                "Fecha de Proceso"
-            ]
+        # encabezados con Paragraph para permitir wrap
+        # nombres cortos para que quepan en las columnas definidas
+        encabezados = [
+            "Usuario",
+            "Anexo",
+            "Proveedor",
+            "Tipo Llamada",
+            "Dur. Total (s)",
+            "Cant. Llam. Usuario",
+            "Cant. Total Llam.",
+            "T. Total Carga (s)",
+            "Prom. Dur. (s)",
+            "Costo",
+            "Fecha Proceso"
         ]
+        datos_tabla = [[Paragraph(h, estilo_header) for h in encabezados]]
 
-        # luego pasara por cada uno de los reportes para escribir
-        for reporte in reportes: # este sera por for
+        # filas de datos con Paragraph para permitir wrap en celdas largas
+        for reporte in reportes:
             datos_tabla.append([
-                str(reporte.id_usuario.nombre_usuario),
-                str(reporte.anexo),
-                str(reporte.proveedor),
-                str(reporte.id_tipo_llamada.nombre),
-                str(reporte.duracion_total_segundos),
-                str(reporte.cant_llamadas_usuario),
-                str(reporte.cant_total_llamadas_usuario),
-                str(reporte.total_tiempo_carga),
-                str(reporte.prom_duracion_llamada),
-                str(reporte.costo_calculado),
-                str(reporte.fecha_proceso)
+                Paragraph(str(reporte.id_usuario.nombre_usuario), estilo_celda),
+                Paragraph(str(reporte.anexo),                     estilo_celda),
+                Paragraph(str(reporte.proveedor),                 estilo_celda),
+                Paragraph(str(reporte.id_tipo_llamada.nombre),    estilo_celda),
+                Paragraph(str(reporte.duracion_total_segundos),   estilo_celda),
+                Paragraph(str(reporte.cant_llamadas_usuario),     estilo_celda),
+                Paragraph(str(reporte.cant_total_llamadas_usuario), estilo_celda),
+                Paragraph(str(reporte.total_tiempo_carga),        estilo_celda),
+                Paragraph(str(reporte.prom_duracion_llamada),     estilo_celda),
+                Paragraph(str(reporte.costo_calculado),           estilo_celda),
+                Paragraph(str(reporte.fecha_proceso),             estilo_celda),
             ])
 
-        # se crea el objeto de la tabla
-        tabla = Table(datos_tabla, repeatRows=1)
+        # tabla con anchos explícitos — evita desbordamiento
+        tabla = Table(datos_tabla, colWidths=col_widths, repeatRows=1)
 
-        # se le entregan los parametros de estilos
         tabla.setStyle(TableStyle([
-            ("BACKGROUND", (0, 0), (-1, 0), colors.lightgrey),
-            ("TEXTCOLOR", (0, 0), (-1, 0), colors.black),
-            ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-            ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-            ("FONTNAME", (0, 1), (-1, -1), "Helvetica"),
-            ("FONTSIZE", (0, 0), (-1, 0), 8),
-            ("FONTSIZE", (0, 1), (-1, -1), 7),
-            ("BOTTOMPADDING", (0, 0), (-1, 0), 8),
-            ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+            # encabezado
+            ("BACKGROUND",    (0, 0), (-1, 0),  colors.HexColor("#2d3748")),
+            ("TEXTCOLOR",     (0, 0), (-1, 0),  colors.white),
+            ("FONTNAME",      (0, 0), (-1, 0),  "Helvetica-Bold"),
+            ("FONTSIZE",      (0, 0), (-1, 0),  7),
+            ("BOTTOMPADDING", (0, 0), (-1, 0),  6),
+            ("TOPPADDING",    (0, 0), (-1, 0),  6),
+            # filas de datos
+            ("FONTNAME",      (0, 1), (-1, -1), "Helvetica"),
+            ("FONTSIZE",      (0, 1), (-1, -1), 7),
+            ("TOPPADDING",    (0, 1), (-1, -1), 4),
+            ("BOTTOMPADDING", (0, 1), (-1, -1), 4),
+            # alineacion
+            ("ALIGN",         (0, 0), (-1, -1), "CENTER"),
+            ("VALIGN",        (0, 0), (-1, -1), "MIDDLE"),
+            # filas alternas para legibilidad
+            ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f7fafc")]),
+            # grilla
+            ("GRID",          (0, 0), (-1, -1), 0.4, colors.HexColor("#cbd5e0")),
+            # borde exterior más marcado
+            ("BOX",           (0, 0), (-1, -1), 0.8, colors.HexColor("#718096")),
         ]))
 
         elementos.append(tabla)

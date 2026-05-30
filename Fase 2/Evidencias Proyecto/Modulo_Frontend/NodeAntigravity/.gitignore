@@ -1,0 +1,78 @@
+# =============================================================
+#  .gitignore — Modulo_Frontend
+#  Solo se trackean los templates Thymeleaf (HTML) y CSS.
+# =============================================================
+
+# ─── Node.js ──────────────────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+.npmrc
+
+# ─── Scripts de generación / prueba (archivos .mjs / .js) ─
+*.mjs
+*.js
+!src/main/resources/static/js/**
+
+# ─── Salidas de prueba y temporales ───────────────────────
+test_out/
+dist/
+build/
+out/
+.cache/
+tmp/
+temp/
+
+# ─── Archivos raw (fuente, no el resultado final) ─────────
+*_raw.html
+
+# ─── Logs ─────────────────────────────────────────────────
+*.log
+logs/
+
+# ─── Variables de entorno y secretos ──────────────────────
+.env
+.env.*
+*.pem
+*.key
+*.p12
+
+# ─── IDEs / Editores ──────────────────────────────────────
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ─── Sistema operativo ────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+
+# ─── Google / Stitch SDK internals ────────────────────────
+.gemini/
+.stitch/
+
+# =============================================================
+#  LO QUE SÍ SE TRACKEA (whitelist explícita):
+#
+#  src/main/resources/templates/**/*.html   ← Thymeleaf
+#  src/main/resources/static/css/**/*.css   ← Estilos
+#  src/main/resources/static/js/**/*.js     ← Scripts propios
+#  src/main/resources/static/img/**         ← Imágenes propias
+#  .gitignore
+# =============================================================

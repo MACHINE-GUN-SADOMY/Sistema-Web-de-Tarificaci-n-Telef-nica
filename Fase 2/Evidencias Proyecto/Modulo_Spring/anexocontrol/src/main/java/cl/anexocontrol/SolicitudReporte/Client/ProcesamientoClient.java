@@ -36,29 +36,15 @@ public class ProcesamientoClient {
 
             String jsonBody = objectMapper.writeValueAsString(bodyMap);
 
-            System.out.println("=== JSON ENVIADO A DJANGO ===");
-            System.out.println(jsonBody);
-            System.out.println("=============================");
-
-            var response = restClient.post()
+            restClient.post()
                     .uri("/procesar-archivo-listo/")
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON)
                     .body(jsonBody)
                     .retrieve()
-                    .toEntity(String.class);
-
-            System.out.println("=== RESPUESTA DJANGO ===");
-            System.out.println("Status: " + response.getStatusCode());
-            System.out.println("Body: " + response.getBody());
-            System.out.println("========================");
+                    .toBodilessEntity();
 
         } catch (RestClientResponseException exception) {
-            System.out.println("=== ERROR DJANGO ===");
-            System.out.println("Status: " + exception.getStatusCode());
-            System.out.println("Body: " + exception.getResponseBodyAsString());
-            System.out.println("====================");
-
             throw new RuntimeException("Error desde Django: " + exception.getResponseBodyAsString());
 
         } catch (Exception exception) {

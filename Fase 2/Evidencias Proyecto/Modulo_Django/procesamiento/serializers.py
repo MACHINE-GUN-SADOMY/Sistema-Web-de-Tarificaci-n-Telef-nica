@@ -3,9 +3,11 @@ from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 
 
+# dto pa pedir que se muestre un reporte
 class MostrarReporteTarificacionRequest(serializers.ModelSerializer):
     idReporteTarificacion = serializers.IntegerField()
 
+# dto pa pedir que se borre un reporte
 class EliminarReporteTarificacionRequest(serializers.ModelSerializer):
     idReporteTarificacion = serializers.IntegerField()
 
@@ -29,6 +31,7 @@ class MostrarReporteTarificacionResponse(ModelSerializer):
         model = ReporteTarificacion
         fields = "__all__"
 
+# dto pa devolver la respuesta despues de procesar
 class ProcesarArchivoResponse(serializers.Serializer):
     mensaje = serializers.CharField()
     idSolicitud = serializers.IntegerField()

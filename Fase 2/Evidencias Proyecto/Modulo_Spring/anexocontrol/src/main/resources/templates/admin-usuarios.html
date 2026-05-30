@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnexoControl | Administración de Usuarios</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=JetBrains+Mono:wght@100..800&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap">
+    <link rel="stylesheet" th:href="@{/css/layout.css}"   href="/css/layout.css">
+    <link rel="stylesheet" th:href="@{/css/usuarios.css}" href="/css/usuarios.css">
+</head>
+<body>
+<div class="app-shell">
+
+    <!-- ===================== SIDEBAR ===================== -->
+    <aside class="sidebar">
+        <div class="brand">
+            <h1 class="brand-title">AnexoControl</h1>
+            <p class="brand-subtitle">Sistema de Tarificación</p>
+        </div>
+
+        <nav class="nav">
+            <a class="nav-link" th:href="@{/dashboard}" href="/dashboard">
+                <span class="material-symbols-outlined">dashboard</span>Panel Principal
+            </a>
+            <a class="nav-link" th:href="@{/reportes}" href="/reportes">
+                <span class="material-symbols-outlined">description</span>Solicitud de Reportes
+            </a>
+            <a class="nav-link active" th:href="@{/usuarios}" href="/usuarios">
+                <span class="material-symbols-outlined">group</span>Usuarios
+            </a>
+            <a class="nav-link" th:href="@{/cuenta}" href="/cuenta">
+                <span class="material-symbols-outlined">settings</span>Configuración
+            </a>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <a class="sidebar-cta" th:href="@{/registrar-usuario}" href="/registrar-usuario">
+                <span class="material-symbols-outlined">person_add</span>Registrar Usuario
+            </a>
+            <a class="sidebar-logout" th:href="@{/login}" href="/login">
+                <span class="material-symbols-outlined">logout</span>Cerrar Sesión
+            </a>
+        </div>
+    </aside>
+
+    <!-- ===================== MAIN ===================== -->
+    <main class="main">
+
+        <!-- TOPBAR -->
+        <header class="topbar">
+            <div class="search-box">
+                <span class="material-symbols-outlined">search</span>
+                <input type="text" placeholder="Buscar usuario...">
+            </div>
+            <div class="topbar-actions">
+                <a class="icon-button" th:href="@{/cuenta}" href="/cuenta">
+                    <span class="material-symbols-outlined">settings</span>
+                </a>
+                <div class="user-chip">
+                    <div class="user-chip-text">
+                        <span class="user-name" th:text="${nombreUsuario} ?: 'Administrador'">Administrador</span>
+                        <span class="user-role" th:text="${rolUsuario} ?: 'Sistema'">Sistema</span>
+                    </div>
+                    <div class="avatar-placeholder">
+                        <span class="material-symbols-outlined">person</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- CONTENT -->
+        <section class="content">
+
+            <div class="page-header">
+                <div>
+                    <p class="page-kicker">Sistema</p>
+                    <h1 class="page-title">Administración de Usuarios</h1>
+                    <p class="page-subtitle">Consulta, modifica y gestiona las cuentas del sistema.</p>
+                </div>
+                <div class="actions-row">
+                    <a class="btn btn-primary" th:href="@{/registrar-usuario}" href="/registrar-usuario">
+                        <span class="material-symbols-outlined">person_add</span>Registrar Usuario
+                    </a>
+                </div>
+            </div>
+
+            <!-- Métricas derivadas de la lista -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <span>Total usuarios</span>
+                        <span class="material-symbols-outlined" style="color: var(--cyan); font-size:20px;">group</span>
+                    </div>
+                    <p class="stat-value cyan"
+                       th:text="${usuarios != null ? #lists.size(usuarios) : 0}">0</p>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <span>Cuentas activas</span>
+                        <span class="material-symbols-outlined" style="color: var(--green); font-size:20px;">check_circle</span>
+                    </div>
+                    <p class="stat-value"
+                       th:text="${usuarios != null ? #lists.size(usuarios.?[estadoCuenta == 'ACTIVA']) : 0}">0</p>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <span>Cuentas bloqueadas</span>
+                        <span class="material-symbols-outlined" style="color: var(--yellow); font-size:20px;">block</span>
+                    </div>
+                    <p class="stat-value"
+                       th:text="${usuarios != null ? #lists.size(usuarios.?[estadoCuenta == 'BLOQUEADA']) : 0}">0</p>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <span>Cuentas inactivas</span>
+                        <span class="material-symbols-outlined" style="color: var(--red); font-size:20px;">cancel</span>
+                    </div>
+                    <p class="stat-value red"
+                       th:text="${usuarios != null ? #lists.size(usuarios.?[estadoCuenta == 'INACTIVA']) : 0}">0</p>
+                </div>
+            </div>
+
+            <!-- ==================== TABLA DE USUARIOS ====================
+                 Endpoint fuente: GET /usuario/mostrar-usuarios?idRolSolicitante=
+                 Ref: UsuarioController#obtenerTodosLosUsuarios
+                 Variables: ${usuarios} List<UsuarioResponse>
+                            ${idRolSolicitante} Long
+                 UsuarioResponse: idUsuario, nombreUsuario, estadoCuenta, idRol, nombreRol
+            -->
+            <div class="user-table-card card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <span class="material-symbols-outlined">manage_accounts</span>Usuarios del Sistema
+                    </h2>
+                </div>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre de Usuario</th>
+                                <th>Rol</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Filas dinámicas -->
+                            <tr th:each="u : ${usuarios}">
+                                <td class="table-id" th:text="${u.idUsuario}">1</td>
+                                <td th:text="${u.nombreUsuario}">admin</td>
+                                <td th:text="${u.nombreRol}">Administrador</td>
+                                <td>
+                                    <span class="badge"
+                                          th:classappend="${u.estadoCuenta == 'ACTIVA'}    ? ' badge-active'   :
+                                                          (${u.estadoCuenta == 'INACTIVA'} ? ' badge-inactive' :
+                                                                                             ' badge-blocked')"
+                                          th:text="${u.estadoCuenta}">ACTIVA</span>
+                                </td>
+                                <td>
+                                    <div class="actions-cell">
+                                        <!-- Modificar: navega al formulario de modificación
+                                             El formulario posta a PUT /usuario/modificar-usuario/{idUsuario}
+                                             Ref: UsuarioController#modificarUsuarioAdmin -->
+                                        <a class="table-action"
+                                           th:href="@{/usuarios/{idUsuario}/modificar(idUsuario=${u.idUsuario})}">
+                                            <span class="material-symbols-outlined">edit</span>Modificar
+                                        </a>
+                                        <!-- NOTA: Eliminar (DELETE /usuario/eliminar-usuario/{idUsuario})
+                                             requiere método DELETE + cuerpo JSON, no compatible con
+                                             formulario HTML estándar. Acción no disponible en esta vista. -->
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- Fila vacía -->
+                            <tr th:if="${usuarios == null or #lists.isEmpty(usuarios)}">
+                                <td colspan="5"
+                                    style="text-align:center; color:var(--muted); padding:40px;
+                                           font-family:'JetBrains Mono',monospace; font-size:12px;">
+                                    No hay usuarios registrados.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="table-footer"
+                     th:if="${usuarios != null and not #lists.isEmpty(usuarios)}"
+                     th:text="'Total: ' + ${#lists.size(usuarios)} + ' usuarios registrados'">
+                    Total: 0 usuarios registrados
+                </div>
+            </div>
+
+        </section>
+    </main>
+</div>
+</body>
+</html>

@@ -1,1 +1,98 @@
+HELP.md
+target/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache/
+
+### IntelliJ IDEA ###
+.idea/
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+
+### Agents and Rules ###
+AGENTS.md
+AGENT.md
+agents/
 .agents/
+.agent/
+.antigravity/
+rules/
+*.rules.md
+CLAUDE.md
+claude.md
+Claude.md
+.claude/
+
+### Python ###
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+env/
+
+### Django / Python local ###
+db.sqlite3
+*.sqlite3
+media/
+staticfiles/
+
+### Node / frontend temporal ###
+node_modules/
+package-lock.json
+dist/
+build/
+
+### Archivos temporales ###
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+### TXT temporales ###
+nuevo4.txt
+Pegado text.txt
+Texto pegado*.txt
+Pasted text.txt
+
+### XML de IDE / workspace ###
+workspace.xml
+tasks.xml
+usage.statistics.xml
+
+### Archivos generados por AnexoControl ###
+Fase 2/Evidencias Proyecto/Modulo_Spring/anexocontrol/archivos/pendientes/*
+Fase 2/Evidencias Proyecto/Modulo_Spring/anexocontrol/archivos/reportes/*
+
+!Fase 2/Evidencias Proyecto/Modulo_Spring/anexocontrol/archivos/pendientes/.gitkeep
+!Fase 2/Evidencias Proyecto/Modulo_Spring/anexocontrol/archivos/reportes/.gitkeep

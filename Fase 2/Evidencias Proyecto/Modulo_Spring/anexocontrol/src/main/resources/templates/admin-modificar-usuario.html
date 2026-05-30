@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnexoControl | Modificar Usuario</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=JetBrains+Mono:wght@100..800&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap">
+    <link rel="stylesheet" th:href="@{/css/layout.css}" href="/css/layout.css">
+    <link rel="stylesheet" th:href="@{/css/form-pages.css}" href="/css/form-pages.css">
+</head>
+<body>
+<div class="app-shell">
+    <aside class="sidebar">
+        <div class="brand"><h1 class="brand-title">AnexoControl</h1><p class="brand-subtitle">Sistema de Tarificación</p></div>
+        <nav class="nav">
+            <a class="nav-link" th:href="@{/dashboard}" href="/dashboard"><span class="material-symbols-outlined">dashboard</span>Panel Principal</a>
+            <a class="nav-link" th:href="@{/reportes}" href="/reportes"><span class="material-symbols-outlined">description</span>Solicitud de Reportes</a>
+            <a class="nav-link active" th:if="${idRolSolicitante == 1}" th:href="@{/usuarios}" href="/usuarios"><span class="material-symbols-outlined">group</span>Usuarios</a>
+            <a class="nav-link" th:href="@{/cuenta}" href="/cuenta"><span class="material-symbols-outlined">settings</span>Configuración</a>
+        </nav>
+        <div class="sidebar-bottom"><a class="sidebar-logout" th:href="@{/login}" href="/login"><span class="material-symbols-outlined">logout</span>Cerrar Sesión</a></div>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <div class="search-box"><span class="material-symbols-outlined">search</span><input type="text" placeholder="Buscar usuario..."></div>
+            <div class="topbar-actions"><a class="icon-button" th:href="@{/cuenta}" href="/cuenta"><span class="material-symbols-outlined">settings</span></a><div class="user-chip"><div class="user-chip-text"><span class="user-name">Administrador</span><span class="user-role">Sistema</span></div><div class="avatar-placeholder"><span class="material-symbols-outlined">person</span></div></div></div>
+        </header>
+
+        <section class="content form-layout">
+            <div class="page-header">
+                <div><p class="page-kicker">Administración</p><h1 class="page-title">Modificar Usuario</h1><p class="page-subtitle">Edite la información, estado y rol de una cuenta del sistema.</p></div>
+            </div>
+
+            <form class="card form-card" th:action="@{/web/modificar-usuario/{idUsuario}(idUsuario=${usuario.idUsuario})}" action="/web/modificar-usuario/0" method="post">
+                <div class="status-header">
+                    <h2 class="status-title">Datos de Usuario</h2>
+                    <span class="badge badge-blocked" th:classappend="${usuario != null and usuario.estadoCuenta == 'ACTIVA'} ? ' badge-active' : (${usuario != null and usuario.estadoCuenta == 'INACTIVA'} ? ' badge-inactive' : ' badge-blocked')" th:text="${usuario != null ? usuario.estadoCuenta : 'BLOQUEADA'}">BLOQUEADA</span>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group full">
+                        <label class="form-label" for="nombreUsuario">Nombre de Usuario</label>
+                        <input class="form-input" id="nombreUsuario" name="nombreUsuario" type="text" placeholder="Ej: Admin Editado" th:value="${usuario != null ? usuario.nombreUsuario : 'Admin Editado'}" required>
+                    </div>
+                    <div class="form-group full">
+                        <label class="form-label" for="contrasenha">Contraseña</label>
+                        <input class="form-input" id="contrasenha" name="contrasenha" type="password" placeholder="Ingrese nueva contraseña" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="estadoCuenta">Estado de Cuenta</label>
+                        <select class="form-select" id="estadoCuenta" name="estadoCuenta" required>
+                            <option value="ACTIVA">ACTIVA</option>
+                            <option value="BLOQUEADA" selected>BLOQUEADA</option>
+                            <option value="INACTIVA">INACTIVA</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="idRol">Rol</label>
+                        <select class="form-select" id="idRol" name="idRol" required>
+                            <option value="1" selected>Administrador</option>
+                            <option value="2">Empleado</option>
+                        </select>
+                    </div>
+                    <input type="hidden" name="idRolSolicitante" th:value="${idRolSolicitante}">
+                    <div class="form-group full">
+                        <div class="warning-box">Esta acción solo puede ser realizada por un administrador.</div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <a class="btn btn-secondary" th:href="@{/usuarios}" href="/usuarios">Cancelar</a>
+                    <button class="btn btn-danger" type="submit" name="estadoCuenta" value="BLOQUEADA">Bloquear Cuenta</button>
+                    <button class="btn btn-primary" type="submit">Guardar Usuario</button>
+                </div>
+            </form>
+        </section>
+    </main>
+</div>
+</body>
+</html>

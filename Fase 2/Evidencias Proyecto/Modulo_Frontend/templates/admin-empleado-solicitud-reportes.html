@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es" xmlns:th="http://www.thymeleaf.org"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AnexoControl | Solicitud de Reportes</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Geist:wght@600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-bright": "#3a3939",
+                    "primary-fixed-dim": "#4cd6ff",
+                    "on-secondary": "#313030",
+                    "error-container": "#93000a",
+                    "tertiary-fixed": "#e4e2e1",
+                    "on-surface-variant": "#bbc9cf",
+                    "outline-variant": "#3c494e",
+                    "on-secondary-fixed-variant": "#474746",
+                    "on-tertiary": "#303030",
+                    "on-secondary-container": "#b7b5b4",
+                    "on-surface": "#e5e2e1",
+                    "surface-dim": "#131313",
+                    "on-tertiary-fixed": "#1b1c1c",
+                    "tertiary": "#dedcdb",
+                    "on-secondary-fixed": "#1c1b1b",
+                    "on-primary-fixed-variant": "#004e60",
+                    "surface-container-high": "#2a2a2a",
+                    "on-primary": "#003543",
+                    "secondary-fixed-dim": "#c8c6c5",
+                    "outline": "#859399",
+                    "tertiary-fixed-dim": "#c8c6c5",
+                    "error": "#ffb4ab",
+                    "surface-container-low": "#1c1b1b",
+                    "on-primary-fixed": "#001f28",
+                    "background": "#131313",
+                    "surface-container-highest": "#353534",
+                    "on-background": "#e5e2e1",
+                    "on-tertiary-container": "#4f4e4e",
+                    "on-tertiary-fixed-variant": "#474746",
+                    "primary": "#a4e6ff",
+                    "on-error-container": "#ffdad6",
+                    "inverse-surface": "#e5e2e1",
+                    "tertiary-container": "#c2c0c0",
+                    "surface-container": "#201f1f",
+                    "surface": "#131313",
+                    "inverse-primary": "#00677f",
+                    "on-error": "#690005",
+                    "inverse-on-surface": "#313030",
+                    "on-primary-container": "#00566a",
+                    "secondary-fixed": "#e5e2e1",
+                    "primary-fixed": "#b7eaff",
+                    "surface-variant": "#353534",
+                    "secondary": "#c8c6c5",
+                    "primary-container": "#00d1ff",
+                    "surface-container-lowest": "#0e0e0e",
+                    "secondary-container": "#474746",
+                    "surface-tint": "#4cd6ff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "lg": "48px",
+                    "margin-mobile": "16px",
+                    "md": "24px",
+                    "sm": "12px",
+                    "margin-desktop": "64px",
+                    "base": "8px",
+                    "gutter": "24px",
+                    "xs": "4px",
+                    "max-width": "1440px",
+                    "xl": "80px"
+            },
+            "fontFamily": {
+                    "display-xl": ["Geist"],
+                    "body-md": ["Inter"],
+                    "headline-md": ["Geist"],
+                    "caption": ["Inter"],
+                    "headline-lg-mobile": ["Geist"],
+                    "body-lg": ["Inter"],
+                    "headline-lg": ["Geist"],
+                    "label-mono": ["JetBrains Mono"]
+            },
+            "fontSize": {
+                    "display-xl": ["64px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                    "caption": ["12px", {"lineHeight": "1.4", "fontWeight": "500"}],
+                    "headline-lg-mobile": ["32px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                    "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "headline-lg": ["40px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                    "label-mono": ["14px", {"lineHeight": "1.2", "letterSpacing": "0.05em", "fontWeight": "500"}]
+            }
+          },
+        },
+      }
+    </script>
+
+<link href="/css/solicitud-reportes.css" rel="stylesheet" th:href="@{/css/solicitud-reportes.css}"/></head>
+<body class="font-body-md text-body-md overflow-x-hidden">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full h-16 z-40 bg-surface-dim/80 backdrop-blur-xl border-b border-outline-variant flex justify-between items-center px-margin-desktop">
+<div class="flex items-center gap-md">
+<span class="font-headline-md text-headline-md font-bold text-on-surface tracking-tighter">AnexoControl</span>
+<div class="hidden md:flex gap-md ml-lg">
+<nav class="flex gap-md items-center">
+<a class="text-primary font-bold border-b-2 border-primary pb-1 font-body-md text-body-md transition-colors duration-200" href="#">Dashboard</a>
+<a class="text-on-surface-variant hover:text-on-surface transition-colors duration-200 font-body-md text-body-md" href="#">Reportes</a>
+<a class="text-on-surface-variant hover:text-on-surface transition-colors duration-200 font-body-md text-body-md" href="#">Analítica</a>
+</nav>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined cursor-pointer text-on-surface-variant hover:text-on-surface transition-colors duration-200" data-icon="notifications">notifications</span>
+<span class="material-symbols-outlined cursor-pointer text-on-surface-variant hover:text-on-surface transition-colors duration-200" data-icon="settings">settings</span>
+<div class="w-8 h-8 rounded-full bg-surface-container-highest overflow-hidden border border-outline-variant">
+<img alt="User Profile Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBJ2mN-716qP-1hhnecBEOoQTAHr1vpnNOuxA9yn-xLDreAxp9GszdGbUUtqi_rUoX4oQRcw-AWMTWB0dceCMncPqxiD7glcH7091n0L4mlhuzIwaCmDQBgz80-58lUIEncPHPssEBVPYem7Ucc7eXtZL9qfqfct-tRB5g3hVLOEAvnX3_hz2qSKoKEvG-XG3496KGVNugXpJPRPNuGOpNWz08g8yU1Tpq1ZHF7_Z13c9RmHIytSDLRshSjzKbTFPOsy2ThlFWdOkcy"/>
+</div>
+</div>
+</header>
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-full w-64 bg-surface-container-low border-r border-outline-variant pt-20 pb-base z-30 flex flex-col hidden md:flex">
+<div class="px-4 mb-lg">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="bolt">bolt</span>
+<div>
+<h2 class="font-headline-md text-headline-md text-primary leading-none">AnexoControl</h2>
+<p class="font-label-mono text-label-mono text-on-surface-variant opacity-70">Premium Tier</p>
+</div>
+</div>
+</div>
+<nav class="flex-grow px-2 space-y-1">
+<a class="flex items-center gap-base bg-surface-container-highest text-primary-fixed-dim rounded-lg px-4 py-3 font-label-mono text-label-mono cursor-pointer active:scale-95 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-base text-on-surface-variant px-4 py-3 font-label-mono text-label-mono hover:bg-surface-bright hover:text-on-surface cursor-pointer active:scale-95 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span>Reportes</span>
+</a>
+<a class="flex items-center gap-base text-on-surface-variant px-4 py-3 font-label-mono text-label-mono hover:bg-surface-bright hover:text-on-surface cursor-pointer active:scale-95 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="query_stats">query_stats</span>
+<span>Analítica</span>
+</a>
+<a class="flex items-center gap-base text-on-surface-variant px-4 py-3 font-label-mono text-label-mono hover:bg-surface-bright hover:text-on-surface cursor-pointer active:scale-95 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span>Clientes</span>
+</a>
+<a class="flex items-center gap-base text-on-surface-variant px-4 py-3 font-label-mono text-label-mono hover:bg-surface-bright hover:text-on-surface cursor-pointer active:scale-95 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="tune">tune</span>
+<span>Configuración</span>
+</a>
+</nav>
+<div class="px-2 mt-auto pt-lg border-t border-outline-variant/30">
+<a class="flex items-center gap-base text-on-surface-variant px-4 py-3 font-label-mono text-label-mono hover:bg-surface-bright hover:text-on-surface transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+<span>Soporte</span>
+</a>
+<a class="flex items-center gap-base text-on-surface-variant px-4 py-3 font-label-mono text-label-mono hover:bg-surface-bright hover:text-on-surface transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span>Cerrar Sesión</span>
+</a>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="md:ml-64 pt-20 min-h-screen px-4 md:px-margin-desktop pb-xl">
+<div class="max-w-max-width mx-auto">
+<!-- Header Section -->
+<section class="mb-lg">
+<h1 class="font-headline-lg text-headline-lg text-on-surface mb-xs">Solicitud de Reportes</h1>
+<p class="text-on-surface-variant font-body-md max-w-2xl">Cargue archivos CSV/TXT de llamadas y genere reportes de tarificación en formato CSV o PDF.</p>
+</section>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-start">
+<!-- Left: Upload & Request Zone -->
+<div class="lg:col-span-7 space-y-gutter">
+ Carga de Archivo 
+<div class="glass-panel p-md rounded-xl">
+<div class="flex items-center justify-between mb-sm">
+<h3 class="font-label-mono text-label-mono text-primary-fixed-dim uppercase">Carga de Archivo</h3>
+<span class="text-caption text-on-surface-variant">Max size 25MB</span>
+</div>
+<div class="drag-zone h-64 rounded-lg flex flex-col items-center justify-center cursor-pointer group" id="drop-zone">
+<div class="w-16 h-16 rounded-full bg-surface-container-highest flex items-center justify-center mb-md group-hover:scale-110 transition-transform duration-300">
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="upload_file">upload_file</span>
+</div>
+<p class="font-headline-md text-headline-md text-on-surface">Arrastre el archivo de llamadas aquí</p>
+<p class="text-on-surface-variant text-caption mt-xs">Soporte for .csv, .xlsx, and .txt files</p>
+<input accept=".csv,.txt" class="hidden" id="file-input" name="archivo" type="file"/>
+</div>
+</div>
+<!-- Form Section -->
+<div class="glass-panel p-md rounded-xl">
+<h3 class="font-label-mono text-label-mono text-primary-fixed-dim uppercase mb-md">Configuración del Reporte</h3>
+<div class="flex flex-col md:flex-row gap-md items-end">
+<div class="flex-grow w-full">
+<label class="block text-caption text-on-surface-variant mb-xs font-label-mono">Tipo de Reporte</label>
+<select class="w-full bg-[#1A1A1A] border border-[#262626] rounded-lg py-3 px-4 text-on-surface focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all appearance-none cursor-pointer" name="idTipoReporte"><option value="1">Reporte PDF</option><option value="2">Reporte CSV</option></select>
+</div>
+<button class="w-full md:w-auto px-lg h-[52px] bg-primary-container text-surface-container-lowest font-bold rounded-lg flex items-center justify-center gap-base active:scale-95 transition-all hover:brightness-110 shadow-[0_0_15px_rgba(0,209,255,0.15)]">
+<span class="material-symbols-outlined" data-icon="bolt" data-weight="fill">bolt</span>
+                                Solicitar
+                            </button>
+</div>
+</div>
+</div>
+<!-- Right: Visual Context/Stats -->
+<div class="lg:col-span-5">
+<div class="glass-panel rounded-xl overflow-hidden h-full flex flex-col">
+<div class="p-md border-b border-outline-variant/30">
+<h3 class="font-label-mono text-label-mono text-primary-fixed-dim uppercase">Estado de Procesamiento</h3>
+</div>
+<div class="flex-grow p-0 relative min-h-[300px]">
+<img alt="System visualization" class="w-full h-full object-cover opacity-60" data-alt="A high-tech digital interface overlay showing glowing teal data streams and abstract circuit patterns against a deep black obsidian background. The composition is cinematic with soft neon blue lens flares and intricate crystalline textures reflecting the light. The mood is sophisticated and futuristic, emphasizing absolute technical precision and a dark mode aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPzzwJmz0u9TOoU0vYdGk0VkymU7-krvXpU6s2FF_w43lJ9ys48M2Tz0jMI7o8H6IVydvMswYozApAzakm2VRIPkHN5jXWTb0eRKb14m2Sq1xg2YWAo6eHGq6jHCfa5sdRxn9QBN4vRPLD34fyejuTQHC6CcvZ6HBxA2HiUq3xJndUYycy3vouEDQREuse42T1AzJGzkhdYIopAsOmwrQYRkLksgpVAOl9x7_FdOhfpozz6bJd_I9ALEglAV_y9rToAglMTL8tlSAf"/>
+<div class="absolute inset-0 bg-gradient-to-t from-[#0D0D0D] via-transparent to-transparent"></div>
+<div class="absolute bottom-md left-md right-md">
+<div class="grid grid-cols-2 gap-sm">
+<div class="bg-surface-container-low/80 backdrop-blur-md p-sm border border-outline-variant/20 rounded-lg">
+<p class="text-caption text-on-surface-variant font-label-mono uppercase">Procesados hoy</p>
+<p class="font-headline-md text-primary">1.2GB</p>
+</div>
+<div class="bg-surface-container-low/80 backdrop-blur-md p-sm border border-outline-variant/20 rounded-lg">
+<p class="text-caption text-on-surface-variant font-label-mono uppercase">Velocidad prom.</p>
+<p class="font-headline-md text-primary">124ms</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- History Table Section -->
+<section class="mt-lg">
+<div class="flex items-center justify-between mb-md px-2">
+<h2 class="font-headline-md text-headline-md text-on-surface">Historial de Solicitudes</h2>
+<div class="flex gap-sm">
+<button class="bg-[#1A1A1A] border border-[#262626] text-on-surface px-md py-2 rounded-lg text-caption flex items-center gap-xs hover:border-on-surface transition-all">
+<span class="material-symbols-outlined text-[18px]" data-icon="filter_list">filter_list</span> Filtrar
+                        </button>
+</div>
+</div>
+<div class="glass-panel rounded-xl overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-outline-variant/30 bg-surface-container-low">
+<th class="py-4 px-md font-label-mono text-label-mono text-on-surface-variant uppercase">Date</th>
+<th class="py-4 px-md font-label-mono text-label-mono text-on-surface-variant uppercase">File Name</th>
+<th class="py-4 px-md font-label-mono text-label-mono text-on-surface-variant uppercase">Report Type</th>
+<th class="py-4 px-md font-label-mono text-label-mono text-on-surface-variant uppercase">Status</th>
+<th class="py-4 px-md font-label-mono text-label-mono text-on-surface-variant uppercase text-right">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-[#1A1A1A]">
+<tr class="hover:bg-[#1F1F1F] transition-colors group">
+<td class="py-4 px-md font-label-mono text-on-surface">2023-10-24</td>
+<td class="py-4 px-md">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="description">description</span>
+<span>oct_calls_v1.csv</span>
+</div>
+</td>
+<td class="py-4 px-md">
+<span class="bg-[#262626] text-on-surface px-sm py-1 rounded-full text-[10px] font-label-mono border border-outline-variant/20 uppercase">PDF</span>
+</td>
+<td class="py-4 px-md">
+<div class="flex items-center gap-xs text-primary">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span class="font-label-mono text-[12px]">LISTO</span>
+</div>
+</td>
+<td class="py-4 px-md text-right">
+<button class="bg-[#262626] hover:bg-on-surface hover:text-surface-container-lowest px-md py-1.5 rounded-lg text-caption font-bold transition-all inline-flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px]" data-icon="download">download</span> Descargar
+                                        </button>
+</td>
+</tr>
+<tr class="hover:bg-[#1F1F1F] transition-colors">
+<td class="py-4 px-md font-label-mono text-on-surface">2023-10-23</td>
+<td class="py-4 px-md">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="description">description</span>
+<span>trunk_logs_final.xlsx</span>
+</div>
+</td>
+<td class="py-4 px-md">
+<span class="bg-[#262626] text-on-surface px-sm py-1 rounded-full text-[10px] font-label-mono border border-outline-variant/20 uppercase">CSV</span>
+</td>
+<td class="py-4 px-md">
+<div class="flex items-center gap-xs text-on-surface-variant">
+<span class="w-2 h-2 rounded-full bg-on-surface-variant/40"></span>
+<span class="font-label-mono text-[12px]">PENDIENTE</span>
+</div>
+</td>
+<td class="py-4 px-md text-right">
+<button class="opacity-30 cursor-not-allowed bg-[#262626] px-md py-1.5 rounded-lg text-caption font-bold inline-flex items-center gap-xs" disabled="">
+<span class="material-symbols-outlined text-[16px]" data-icon="download">download</span> Descargar
+                                        </button>
+</td>
+</tr>
+<tr class="hover:bg-[#1F1F1F] transition-colors">
+<td class="py-4 px-md font-label-mono text-on-surface">2023-10-22</td>
+<td class="py-4 px-md">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="description">description</span>
+<span>weekly_audit_rep.csv</span>
+</div>
+</td>
+<td class="py-4 px-md">
+<span class="bg-[#262626] text-on-surface px-sm py-1 rounded-full text-[10px] font-label-mono border border-outline-variant/20 uppercase">PDF</span>
+</td>
+<td class="py-4 px-md">
+<div class="flex items-center gap-xs text-primary">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span class="font-label-mono text-[12px]">LISTO</span>
+</div>
+</td>
+<td class="py-4 px-md text-right">
+<button class="bg-[#262626] hover:bg-on-surface hover:text-surface-container-lowest px-md py-1.5 rounded-lg text-caption font-bold transition-all inline-flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px]" data-icon="download">download</span> Descargar
+                                        </button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- Micro-interactions Script -->
+<script>
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('border-primary', 'bg-primary/5');
+        });
+
+        ['dragleave', 'drop'].forEach(event => {
+            dropZone.addEventListener(event, () => {
+                dropZone.classList.remove('border-primary', 'bg-primary/5');
+            });
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const files = e.dataTransfer.files;
+            if(files.length > 0) {
+                alert(`File ready for flux processing: ${files[0].name}`);
+            }
+        });
+
+        fileInput.addEventListener('change', () => {
+            if(fileInput.files.length > 0) {
+                alert(`File selected: ${fileInput.files[0].name}`);
+            }
+        });
+
+        // Background subtle parallax or movement effect could be added here for extra "Flux" feel
+    </script>
+</body></html>

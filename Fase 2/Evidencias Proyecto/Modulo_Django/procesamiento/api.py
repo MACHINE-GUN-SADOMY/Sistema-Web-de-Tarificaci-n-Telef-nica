@@ -30,16 +30,21 @@ class MostrarTodasLasTarificaciones(APIView):
                 status=status.HTTP_400_BAD_REQUEST)
 
 class MostrarTarifificacionPorIdReporte(APIView):
+    # traemos un puro reporte por su id
     def get(self, request, id):
         try:
+            # armamos el diccionario pa mandar
             data = {"idReporteTarificacion" : id}
 
+            # buscamos el reporte
             reporte = mostrarTarificacionPorId(data)
 
+            # serializamos lo que pillamos
             response_serializer = MostrarReporteTarificacionResponse(reporte, many=False)
 
             return Response(response_serializer.data, status=status.HTTP_200_OK)
 
+        # si falla algo devolvemos 400
         except serializers.ValidationError as exception:
             return Response({
                 "mensaje" : "Error de validacion",
@@ -84,17 +89,22 @@ class ProcesamientoLlamadas(APIView):
             )
 
 class EliminarTarificacion(APIView):
+    # borramos un reporte que ya no sirve
     def delete(self,request,id):
         try:
+            # mandamos el id en un dicc
             data = {"idReporteTarificacion" : id}
 
+            # llamamos al repo pa borrar
             reporteEliminado = eliminarReportePorIdReporte(data)
 
+            # si se borro mandamos todo ok
             if reporteEliminado is True:
                 return Response({
                     "mensaje": "Reporte eliminado",
                 },status=status.HTTP_204_NO_CONTENT)
 
+        # si salta un error de validacion lo cachamos aca
         except serializers.ValidationError as exception:
             return Response({
             'mensaje' : 'Error Inesperado',

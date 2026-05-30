@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnexoControl | Registrar Usuario</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=JetBrains+Mono:wght@100..800&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap">
+    <link rel="stylesheet" th:href="@{/css/layout.css}" href="/css/layout.css">
+    <link rel="stylesheet" th:href="@{/css/auth-pages.css}" href="/css/auth-pages.css">
+</head>
+<body class="auth-page">
+<section class="auth-card">
+    <a class="auth-close" th:href="@{/login}" href="/login" aria-label="Cerrar">×</a>
+    <h1 class="auth-title">Registrar Usuario</h1>
+    <p class="auth-subtitle">Añadir nuevo miembro al sistema</p>
+
+    <form class="auth-form" th:action="@{/web/registrar-usuario}" action="/web/registrar-usuario" method="post">
+        <div class="form-group">
+            <label class="form-label" for="nombreUsuario">Nombre de Usuario</label>
+            <input class="form-input" id="nombreUsuario" name="nombreUsuario" type="text" placeholder="Ej: operador01" required>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="contrasenha">Contraseña</label>
+            <input class="form-input" id="contrasenha" name="contrasenha" type="password" placeholder="Ingrese contraseña" required>
+        </div>
+
+        <input type="hidden" name="idRol" value="2">
+
+        <p class="auth-note">Las nuevas cuentas se registran como empleado. Un administrador puede modificar el rol posteriormente.</p>
+
+        <div class="auth-actions">
+            <a class="btn btn-secondary" th:href="@{/login}" href="/login">Cancelar</a>
+            <button class="btn btn-primary" type="submit">Registrar</button>
+        </div>
+    </form>
+</section>
+</body>
+</html>
