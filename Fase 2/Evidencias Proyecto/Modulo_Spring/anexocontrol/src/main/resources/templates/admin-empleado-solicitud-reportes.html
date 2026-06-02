@@ -30,7 +30,10 @@
                 <span class="material-symbols-outlined">description</span>
                 <span>Solicitud de Reportes</span>
             </a>
-            <a class="nav-link" th:if="${idRolSolicitante == 1}" th:href="@{/usuarios}" href="/usuarios">
+            <a class="nav-link"
+               th:if="${idRolSolicitante == 1 or idRol == 1}"
+               th:href="@{/usuarios}"
+               href="/usuarios">
                 <span class="material-symbols-outlined">group</span>
                 <span>Usuarios</span>
             </a>
@@ -41,7 +44,7 @@
         </nav>
 
         <div class="sidebar-bottom">
-            <a class="sidebar-logout" th:href="@{/login}" href="/login">
+            <a class="sidebar-logout" th:href="@{/logout}" href="/logout">
                 <span class="material-symbols-outlined">logout</span>Cerrar Sesión
             </a>
         </div>
@@ -57,9 +60,6 @@
                 <input type="text" placeholder="Buscar reportes..." aria-label="Buscar">
             </div>
             <div class="topbar-actions">
-                <a class="icon-button" href="#" aria-label="Notificaciones">
-                    <span class="material-symbols-outlined">notifications</span>
-                </a>
                 <a class="icon-button" th:href="@{/cuenta}" href="/cuenta" aria-label="Configuración">
                     <span class="material-symbols-outlined">settings</span>
                 </a>
@@ -95,19 +95,15 @@
                 Ha ocurrido un error.
             </div>
 
-            <!-- ==================== FORMULARIO ====================
-                 Endpoint: POST /solicitud-reporte/crear-solicitud
-                 Params:   archivo (MultipartFile), idUsuario (Long), idTipoReporte (Integer)
-                 Ref:      SolicitudReporteController#solicitarReporte
-            -->
             <form class="card form-card"
                   th:action="@{/web/crear-solicitud}"
                   action="/web/crear-solicitud"
                   method="post"
                   enctype="multipart/form-data">
 
-                <!-- ID del usuario autenticado - oculto -->
-                <input type="hidden" name="idUsuario" th:value="${idUsuario}">
+                <input type="hidden"
+                       name="idUsuario"
+                       th:value="${idUsuario != null ? idUsuario : idUsuarioSolicitante}">
 
                 <h2 class="form-section-title">Nueva Solicitud</h2>
 
@@ -119,7 +115,7 @@
                         <label class="upload-zone" for="archivo">
                             <span class="material-symbols-outlined upload-zone-icon">upload_file</span>
                             <p class="upload-zone-title">Seleccione un archivo para procesar</p>
-                            <p class="upload-zone-hint">El archivo se enviará al presionar Solicitar &nbsp;·&nbsp; .csv — .txt &nbsp;·&nbsp; Máx. 25 MB</p>
+                            <p class="upload-zone-hint">El archivo se enviará al presionar Solicitar. Formatos aceptados: .csv — .txt &nbsp;·&nbsp; Máximo 25 MB</p>
                             <input class="upload-zone-input"
                                    id="archivo"
                                    name="archivo"
@@ -142,7 +138,7 @@
                     <div class="form-group">
                         <div class="info-box">
                             <strong>Información:</strong> El procesamiento puede tardar algunos minutos
-                            según el volumen del archivo. El reporte estará disponible en el historial
+                            según el volumen del archivo. El reporte estará disponible en Mis Solicitudes
                             una vez que el sistema lo genere.
                         </div>
                     </div>
@@ -179,66 +175,66 @@
                 <div class="table-wrapper">
                     <table class="dashboard-table">
                         <thead>
-                        <tr>
-                            <th>ID Solicitud</th>
-                            <th>ID Carga</th>
-                            <th>Tipo</th>
-                            <th>Estado</th>
-                            <th>Fecha</th>
-                            <th>Acción</th>
-                        </tr>
+                            <tr>
+                                <th>ID Solicitud</th>
+                                <th>ID Carga</th>
+                                <th>Tipo</th>
+                                <th>Estado</th>
+                                <th>Fecha</th>
+                                <th>Acción</th>
+                            </tr>
                         </thead>
                         <tbody>
-                        <!-- Filas dinámicas -->
-                        <tr th:each="s : ${solicitudes}">
-                            <td class="table-id" th:text="'#' + ${s.idSolicitud}">#42</td>
-                            <td th:text="${s.idCarga}">1040</td>
-                            <td>
+                            <!-- Filas dinámicas -->
+                            <tr th:each="s : ${solicitudes}">
+                                <td class="table-id" th:text="'#' + ${s.idSolicitud}">#42</td>
+                                <td th:text="${s.idCarga}">1040</td>
+                                <td>
                                     <span class="type-badge"
                                           th:text="${s.idTipoReporte == 1 ? 'PDF' : 'CSV'}">CSV</span>
-                            </td>
-                            <td>
+                                </td>
+                                <td>
                                     <span class="status-badge"
                                           th:classappend="${s.estadoSolicitado == 'LISTO'}   ? ' listo'     :
                                                           (${s.estadoSolicitado == 'ERROR'}   ? ' error'     :
                                                                                                 ' pendiente')"
                                           th:text="${s.estadoSolicitado}">LISTO</span>
-                            </td>
-                            <td th:text="${s.fechaSolicitud}">27/05/2026</td>
-                            <td>
-                                <!-- LISTO → descargar
-                                     Endpoint: GET /solicitud-reporte/{idSolicitud}/descargar
-                                     Ref: SolicitudReporteController#descargarReporte -->
-                                <a class="table-link"
-                                   th:if="${s.estadoSolicitado == 'LISTO'}"
-                                   th:href="@{/web/descargar/{idSolicitud}(idSolicitud=${s.idSolicitud})}">
-                                    <span class="material-symbols-outlined">download</span>Descargar
-                                </a>
-                                <!-- PENDIENTE → sin acción -->
-                                <span class="table-link warning"
-                                      th:if="${s.estadoSolicitado == 'PENDIENTE'}">
-                                        <span class="material-symbols-outlined">hourglass_empty</span>Procesando
-                                    </span>
-                                <!-- ERROR → ver detalle
-                                     Endpoint: GET /solicitud-reporte/obtener-solicitud/{id}
-                                     Ref: SolicitudReporteController#obtenerPorId -->
-                                <a class="table-link danger"
-                                   th:if="${s.estadoSolicitado == 'ERROR'}"
-                                   th:href="@{/solicitud-reporte/obtener-solicitud/{id}(id=${s.idSolicitud},
+                                </td>
+                                <td th:text="${s.fechaSolicitud}">27/05/2026</td>
+                                <td>
+                                    <!-- LISTO → descargar
+                                         Endpoint: GET /solicitud-reporte/{id}/descargar
+                                         Ref: SolicitudReporteController#descargarReporte -->
+                                    <a class="table-link"
+                                       th:if="${s.estadoSolicitado == 'LISTO'}"
+                                       th:href="@{/solicitud-reporte/{id}/descargar(id=${s.idSolicitud},
                                                   idUsuarioSolicitante=${idUsuario},
                                                   idRolSolicitante=${idRolSolicitante})}">
-                                    <span class="material-symbols-outlined">visibility</span>Ver detalle
-                                </a>
-                            </td>
-                        </tr>
+                                        <span class="material-symbols-outlined">download</span>Descargar
+                                    </a>
+                                    <!-- PENDIENTE → sin acción -->
+                                    <span class="table-link warning"
+                                          th:if="${s.estadoSolicitado == 'PENDIENTE'}">
+                                        <span class="material-symbols-outlined">hourglass_empty</span>Procesando
+                                    </span>
+                                    <!-- ERROR → ver detalle
+                                         Endpoint: GET /solicitud-reporte/obtener-solicitud/{id}
+                                         Ref: SolicitudReporteController#obtenerPorId -->
+                                    <a class="table-link danger"
+                                       th:if="${s.estadoSolicitado == 'ERROR'}"
+                                       th:href="@{/error/solicitud-con-error}">
+                                        <span class="material-symbols-outlined">visibility</span>Ver detalle
+                                    </a>
+                                </td>
+                            </tr>
 
-                        <!-- Fila vacía si no hay solicitudes -->
-                        <tr th:if="${solicitudes == null or #lists.isEmpty(solicitudes)}">
-                            <td colspan="6" class="table-empty">
-                                <span class="material-symbols-outlined">inbox</span>
-                                No hay solicitudes registradas aún.
-                            </td>
-                        </tr>
+                            <!-- Fila vacía si no hay solicitudes -->
+                            <tr th:if="${solicitudes == null or #lists.isEmpty(solicitudes)}">
+                                <td colspan="6" class="table-empty">
+                                    <span class="material-symbols-outlined">inbox</span>
+                                    No hay solicitudes registradas aún.
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>

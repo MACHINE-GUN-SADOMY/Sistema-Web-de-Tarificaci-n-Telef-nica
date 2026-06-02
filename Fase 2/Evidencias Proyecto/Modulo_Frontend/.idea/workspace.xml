@@ -10,34 +10,34 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../../.." />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 5,
-  "fromUser": false
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 5,
+  &quot;fromUser&quot;: false
+}</component>
   <component name="ProjectId" id="3EP8KaVLReIuUgj4fPbUaSX74xq" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "JavaScript Debug.login.html.executor": "Run",
-    "JavaScript Debug.login_raw.html.executor": "Run",
-    "JavaScript Debug.solicitud-reportes.html.executor": "Run",
-    "JavaScript Debug.user_dashboard_raw.html.executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "codeWithMe.voiceChat.enabledByDefault": "false",
-    "git-widget-placeholder": "main",
-    "ignore.virus.scanning.warn.message": "true",
-    "javascript.preferred.runtime.type.id": "node",
-    "last_opened_file_path": "C:/Users/h8_hate machine/Documents/GitHub/Sistema-Web-de-Tarificaci-n-Telef-nica/Fase 2/Evidencias Proyecto/Modulo_Frontend",
-    "nodejs_package_manager_path": "npm",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;JavaScript Debug.login.html.executor&quot;: &quot;Run&quot;,
+    &quot;JavaScript Debug.login_raw.html.executor&quot;: &quot;Run&quot;,
+    &quot;JavaScript Debug.solicitud-reportes.html.executor&quot;: &quot;Run&quot;,
+    &quot;JavaScript Debug.user_dashboard_raw.html.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;javascript.preferred.runtime.type.id&quot;: &quot;node&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/h8_hate machine/Documents/GitHub/Sistema-Web-de-Tarificaci-n-Telef-nica/Fase 2/Evidencias Proyecto/Modulo_Frontend&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\h8_hate machine\Documents\GitHub\Sistema-Web-de-Tarificaci-n-Telef-nica\Fase 2\Evidencias Proyecto\Modulo_Frontend\css" />
@@ -58,6 +58,7 @@
       <option name="presentableId" value="Default" />
       <updated>1780068780549</updated>
       <workItem from="1780068781558" duration="8320000" />
+      <workItem from="1780425532250" duration="18000" />
     </task>
     <servers />
   </component>

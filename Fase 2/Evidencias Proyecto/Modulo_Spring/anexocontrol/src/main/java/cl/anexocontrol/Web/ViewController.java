@@ -11,6 +11,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,11 +27,43 @@ public class ViewController {
         this.solicitudReporteService = solicitudReporteService;
     }
 
-    // --- Helpers ---
+    // ─────────────────────────────────────────────
+    // Helpers de sesión y entidad
+    // ─────────────────────────────────────────────
+
+    /**
+     * Extrae un Long de sesion de forma segura.
+     * Acepta que el valor este guardado como Long, Integer o cualquier Number
+     * (evita ClassCastException si la sesion guardo un Integer).
+     */
+    private Long sessionLong(HttpSession session, String key) {
+        Object val = session.getAttribute(key);
+        if (val instanceof Number) {
+            return ((Number) val).longValue();
+        }
+        return null;
+    }
+
+    /**
+     * Lee idRolSolicitante con fallback a idRol.
+     * Algunos flujos del proyecto guardan el rol como "idRol" en lugar de "idRolSolicitante".
+     * Se intenta primero "idRolSolicitante"; si viene null se intenta "idRol".
+     */
+    private Long resolverRol(HttpSession session) {
+        Long rol = sessionLong(session, "idRolSolicitante");
+        if (rol == null) {
+            rol = sessionLong(session, "idRol");
+        }
+        return rol;
+    }
 
     private void addSessionToModel(Model model, HttpSession session) {
-        model.addAttribute("idUsuario",        session.getAttribute("idUsuario"));
-        model.addAttribute("idRolSolicitante", session.getAttribute("idRolSolicitante"));
+        Long idUsuario        = sessionLong(session, "idUsuario");
+        Long idRolSolicitante = resolverRol(session);
+
+        model.addAttribute("idUsuario",        idUsuario);
+        model.addAttribute("idRolSolicitante", idRolSolicitante);
+        model.addAttribute("idRol",            idRolSolicitante);   // alias por compatibilidad
         model.addAttribute("nombreUsuario",    session.getAttribute("nombreUsuario"));
         model.addAttribute("rolUsuario",       session.getAttribute("nombreRol"));
     }
@@ -54,7 +87,9 @@ public class ViewController {
         }
     }
 
-    // --- Vistas públicas ---
+    // ─────────────────────────────────────────────
+    // Vistas públicas
+    // ─────────────────────────────────────────────
 
     @GetMapping({"/", "/login"})
     public String login() {
@@ -66,63 +101,194 @@ public class ViewController {
         return "empleado-admin-registrar-usuario";
     }
 
-    // --- Dashboard ---
+    // ─────────────────────────────────────────────
+    // Dashboard — ruta única, template según rol
+    // ─────────────────────────────────────────────
 
     @GetMapping("/dashboard")
     public String dashboard(Model model, HttpSession session) {
+        Long idUsuario        = sessionLong(session, "idUsuario");
+        Long idRolSolicitante = resolverRol(session);
+
+        // sin sesion valida, redirigir a login
+        if (idUsuario == null || idRolSolicitante == null) {
+            return "redirect:/login";
+        }
+
         addSessionToModel(model, session);
 
-        Long idUsuario        = (Long) session.getAttribute("idUsuario");
-        Long idRolSolicitante = (Long) session.getAttribute("idRolSolicitante");
-
-        if (idUsuario != null && idRolSolicitante != null) {
-            try {
-                List<SolicitudReporteJpa> solicitudes = solicitudReporteService
-                        .listarPorUsuarioConPermiso(idUsuario, idUsuario, idRolSolicitante);
-
-                model.addAttribute("totalReportes",
-                        solicitudes.stream()
-                                .filter(s -> "LISTO".equals(s.getEstadoSolicitado())).count());
-                model.addAttribute("solicitudesPendientes",
-                        solicitudes.stream()
-                                .filter(s -> "PENDIENTE".equals(s.getEstadoSolicitado())).count());
-                model.addAttribute("erroresProcesamiento",
-                        solicitudes.stream()
-                                .filter(s -> "ERROR".equals(s.getEstadoSolicitado())).count());
-
-                model.addAttribute("solicitudes", solicitudes.stream()
-                        .sorted((a, b) -> {
-                            if (a.getFechaSolicitud() == null
-                                    || b.getFechaSolicitud() == null) return 0;
-                            return b.getFechaSolicitud().compareTo(a.getFechaSolicitud());
-                        })
-                        .limit(10)
-                        .collect(Collectors.toList()));
-            } catch (RuntimeException e) {
-                // fallback visual activo
-            }
+        if (Long.valueOf(1L).equals(idRolSolicitante)) {
+            cargarDashboardAdmin(model, idUsuario, idRolSolicitante);
+            return "admin-dashboard";
         }
 
-        if (idRolSolicitante != null) {
-            try {
-                model.addAttribute("usuariosActivos",
-                        usuarioService.mostrarTodosLosUsuarios(idRolSolicitante).size());
-            } catch (RuntimeException e) {
-                // PENDIENTE: rol sin permiso — fallback visual activo (muestra 0)
-            }
-        }
-
-        return "admin-dashboard";
+        cargarDashboardEmpleado(model, idUsuario, idRolSolicitante);
+        return "empleado-dashboard";
     }
 
-    // --- Solicitud de Reportes + Historial ---
+    /**
+     * Dashboard ADMINISTRADOR
+     *
+     * Sección 1 — Resumen del Sistema:
+     *   totalReportesSistema, solicitudesPendientesSistema, erroresSistema,
+     *   totalUsuariosSistema
+     *   Fuente: listarTodasLasSolicitudes() → todas las solicitudes, ordenadas DESC
+     *
+     * Sección 2 — Resumen del Usuario:
+     *   misTotalReportes, misSolicitudesPendientes, misErrores,
+     *   misUltimasSolicitudes (límite 5, propias del admin autenticado)
+     *   Fuente: listarPorUsuarioConPermiso() → solo el usuario autenticado
+     *
+     * Sección 3 — Actividad Reciente Global:
+     *   actividadGlobal (límite 10, todos los estados, todos los usuarios)
+     *   Fuente: misma lista del punto 1, ya ordenada
+     */
+    private void cargarDashboardAdmin(Model model, Long idUsuario, Long idRolSolicitante) {
+
+        // ── Métricas globales + actividad reciente del sistema ─────────────────
+        try {
+            List<SolicitudReporteJpa> todas =
+                    solicitudReporteService.listarTodasLasSolicitudes();
+            // ya viene ordenada por fechaSolicitud DESC desde el service
+
+            model.addAttribute("totalReportesSistema",
+                    todas.stream().filter(s -> "LISTO".equals(s.getEstadoSolicitado())).count());
+
+            model.addAttribute("solicitudesPendientesSistema",
+                    todas.stream().filter(s -> "PENDIENTE".equals(s.getEstadoSolicitado())).count());
+
+            model.addAttribute("erroresSistema",
+                    todas.stream().filter(s -> "ERROR".equals(s.getEstadoSolicitado())).count());
+
+            // actividad global: primeras 10 de la lista ya ordenada
+            model.addAttribute("actividadGlobal",
+                    todas.stream().limit(10).collect(Collectors.toList()));
+
+        } catch (RuntimeException e) {
+            model.addAttribute("totalReportesSistema", 0);
+            model.addAttribute("solicitudesPendientesSistema", 0);
+            model.addAttribute("erroresSistema", 0);
+            model.addAttribute("actividadGlobal", Collections.emptyList());
+        }
+
+        // ── Total usuarios registrados ─────────────────────────────────────────
+        try {
+            model.addAttribute("totalUsuariosSistema",
+                    usuarioService.mostrarTodosLosUsuarios(idRolSolicitante).size());
+        } catch (RuntimeException e) {
+            model.addAttribute("totalUsuariosSistema", 0);
+        }
+
+        // ── Métricas y solicitudes propias del admin autenticado ───────────────
+        if (idUsuario == null || idRolSolicitante == null) {
+            model.addAttribute("misTotalReportes", 0);
+            model.addAttribute("misSolicitudesPendientes", 0);
+            model.addAttribute("misErrores", 0);
+            model.addAttribute("misUltimasSolicitudes", Collections.emptyList());
+            return;
+        }
+
+        try {
+            List<SolicitudReporteJpa> mias =
+                    solicitudReporteService.listarPorUsuarioConPermiso(
+                            idUsuario, idUsuario, idRolSolicitante);
+
+            model.addAttribute("misTotalReportes",
+                    mias.stream().filter(s -> "LISTO".equals(s.getEstadoSolicitado())).count());
+
+            model.addAttribute("misSolicitudesPendientes",
+                    mias.stream().filter(s -> "PENDIENTE".equals(s.getEstadoSolicitado())).count());
+
+            model.addAttribute("misErrores",
+                    mias.stream().filter(s -> "ERROR".equals(s.getEstadoSolicitado())).count());
+
+            // últimas 5 propias, ordenadas por fecha DESC
+            List<SolicitudReporteJpa> misUltimas = mias.stream()
+                    .sorted((a, b) -> {
+                        if (a.getFechaSolicitud() == null && b.getFechaSolicitud() == null) return 0;
+                        if (a.getFechaSolicitud() == null) return 1;
+                        if (b.getFechaSolicitud() == null) return -1;
+                        return b.getFechaSolicitud().compareTo(a.getFechaSolicitud());
+                    })
+                    .limit(5)
+                    .collect(Collectors.toList());
+
+            model.addAttribute("misUltimasSolicitudes", misUltimas);
+
+        } catch (RuntimeException e) {
+            model.addAttribute("misTotalReportes", 0);
+            model.addAttribute("misSolicitudesPendientes", 0);
+            model.addAttribute("misErrores", 0);
+            model.addAttribute("misUltimasSolicitudes", Collections.emptyList());
+        }
+    }
+
+    /**
+     * Dashboard EMPLEADO
+     *
+     * Solo datos del usuario autenticado. No recibe ni calcula ninguna métrica global.
+     *
+     * totalReportes, solicitudesPendientes, erroresProcesamiento,
+     * solicitudes (últimas 10 propias, todos los estados, ordenadas por fecha DESC)
+     */
+    private void cargarDashboardEmpleado(Model model, Long idUsuario, Long idRolSolicitante) {
+        if (idUsuario == null || idRolSolicitante == null) {
+            model.addAttribute("totalReportes", 0);
+            model.addAttribute("solicitudesPendientes", 0);
+            model.addAttribute("erroresProcesamiento", 0);
+            model.addAttribute("solicitudes", Collections.emptyList());
+            return;
+        }
+
+        try {
+            List<SolicitudReporteJpa> mias =
+                    solicitudReporteService.listarPorUsuarioConPermiso(
+                            idUsuario, idUsuario, idRolSolicitante);
+
+            model.addAttribute("totalReportes",
+                    mias.stream().filter(s -> "LISTO".equals(s.getEstadoSolicitado())).count());
+
+            model.addAttribute("solicitudesPendientes",
+                    mias.stream().filter(s -> "PENDIENTE".equals(s.getEstadoSolicitado())).count());
+
+            model.addAttribute("erroresProcesamiento",
+                    mias.stream().filter(s -> "ERROR".equals(s.getEstadoSolicitado())).count());
+
+            // últimas 10 propias, ordenadas por fecha DESC, todos los estados
+            List<SolicitudReporteJpa> ultimas = mias.stream()
+                    .sorted((a, b) -> {
+                        if (a.getFechaSolicitud() == null && b.getFechaSolicitud() == null) return 0;
+                        if (a.getFechaSolicitud() == null) return 1;
+                        if (b.getFechaSolicitud() == null) return -1;
+                        return b.getFechaSolicitud().compareTo(a.getFechaSolicitud());
+                    })
+                    .limit(10)
+                    .collect(Collectors.toList());
+
+            model.addAttribute("solicitudes", ultimas);
+
+        } catch (RuntimeException e) {
+            model.addAttribute("totalReportes", 0);
+            model.addAttribute("solicitudesPendientes", 0);
+            model.addAttribute("erroresProcesamiento", 0);
+            model.addAttribute("solicitudes", Collections.emptyList());
+        }
+    }
+
+    // ─────────────────────────────────────────────
+    // Solicitud de Reportes + Historial
+    // ─────────────────────────────────────────────
 
     @GetMapping("/reportes")
     public String solicitudReportes(Model model, HttpSession session) {
         addSessionToModel(model, session);
 
-        Long idUsuario        = (Long) session.getAttribute("idUsuario");
-        Long idRolSolicitante = (Long) session.getAttribute("idRolSolicitante");
+        Long idUsuario        = sessionLong(session, "idUsuario");
+        Long idRolSolicitante = resolverRol(session);
+
+        model.addAttribute("idUsuario", idUsuario);
+        model.addAttribute("idUsuarioSolicitante", idUsuario);
+        model.addAttribute("idRolSolicitante", idRolSolicitante);
 
         if (idUsuario != null && idRolSolicitante != null) {
             try {
@@ -133,14 +299,12 @@ public class ViewController {
             }
         }
 
-        return "admin-empleado-solicitud-reportes.html";
+        return "admin-empleado-solicitud-reportes";
     }
 
-    // ELIMINADO: GET /reportes/{idSolicitud}
-    // La vista detalle-solicitud fue eliminada del proyecto.
-    // "Ver detalle" para solicitudes ERROR apunta directamente a /error/solicitud-con-error.
-
-    // --- Pantallas de error controlado ---
+    // ─────────────────────────────────────────────
+    // Pantallas de error controlado
+    // ─────────────────────────────────────────────
 
     @GetMapping("/error/solicitud-con-error")
     public String errorSolicitudConError(Model model, HttpSession session) {
@@ -164,13 +328,15 @@ public class ViewController {
         return "error";
     }
 
-    // --- Usuarios ---
+    // ─────────────────────────────────────────────
+    // Usuarios
+    // ─────────────────────────────────────────────
 
     @GetMapping("/usuarios")
     public String usuarios(Model model, HttpSession session) {
         addSessionToModel(model, session);
 
-        Long idRolSolicitante = (Long) session.getAttribute("idRolSolicitante");
+        Long idRolSolicitante = resolverRol(session);
         if (idRolSolicitante != null) {
             try {
                 List<UsuarioResponse> usuarios = usuarioService
@@ -203,13 +369,15 @@ public class ViewController {
         return "admin-modificar-usuario";
     }
 
-    // --- Cuenta ---
+    // ─────────────────────────────────────────────
+    // Cuenta
+    // ─────────────────────────────────────────────
 
     @GetMapping("/cuenta")
     public String actualizarCuenta(Model model, HttpSession session) {
         addSessionToModel(model, session);
 
-        Long idUsuario = (Long) session.getAttribute("idUsuario");
+        Long idUsuario = sessionLong(session, "idUsuario");
         if (idUsuario != null) {
             try {
                 model.addAttribute("usuarioActual",
@@ -222,7 +390,9 @@ public class ViewController {
         return "empleado-actualizar-cuenta";
     }
 
-    // --- Logout provisional ---
+    // ─────────────────────────────────────────────
+    // Logout provisional
+    // ─────────────────────────────────────────────
 
     @GetMapping("/logout")
     public String logout(HttpSession session) {

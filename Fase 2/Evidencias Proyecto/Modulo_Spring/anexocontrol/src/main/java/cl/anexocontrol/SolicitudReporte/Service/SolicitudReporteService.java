@@ -130,24 +130,52 @@ public class SolicitudReporteService {
         return solicitud;
     }
 
-    // lista todas las solicitudes de un usuario sin importar permisos
+    // lista todas las solicitudes de un usuario sin importar permisos, ordenadas por fecha DESC
     @Transactional(readOnly = true)
     public List<SolicitudReporteJpa> listarPorUsuario(Long idUsuario) {
         if (idUsuario == null) {
             throw new RuntimeException("El id de usuario es obligatorio");
         }
 
-        return solicitudReporteJpaRepository.findByIdUsuario(idUsuario);
+        return solicitudReporteJpaRepository.findByIdUsuario(idUsuario)
+                .stream()
+                .sorted((a, b) -> {
+                    if (a.getFechaSolicitud() == null && b.getFechaSolicitud() == null) return 0;
+                    if (a.getFechaSolicitud() == null) return 1;
+                    if (b.getFechaSolicitud() == null) return -1;
+                    int cmp = b.getFechaSolicitud().compareTo(a.getFechaSolicitud());
+                    if (cmp != 0) return cmp;
+                    // desempate por idSolicitud DESC para orden estable
+                    if (a.getIdSolicitud() == null && b.getIdSolicitud() == null) return 0;
+                    if (a.getIdSolicitud() == null) return 1;
+                    if (b.getIdSolicitud() == null) return -1;
+                    return b.getIdSolicitud().compareTo(a.getIdSolicitud());
+                })
+                .collect(java.util.stream.Collectors.toList());
     }
 
-    // lista las solicitudes de un usuario verificando quien las pide
+    // lista las solicitudes de un usuario verificando quien las pide, ordenadas por fecha DESC
     @Transactional(readOnly = true)
     public List<SolicitudReporteJpa> listarPorUsuarioConPermiso(Long idUsuario, Long idUsuarioSolicitante,
             Long idRolSolicitante) {
         // revisamos si el solicitante puede ver la data de este usuario
         validarAccesoUsuario(idUsuario, idUsuarioSolicitante, idRolSolicitante);
 
-        return solicitudReporteJpaRepository.findByIdUsuario(idUsuario);
+        return solicitudReporteJpaRepository.findByIdUsuario(idUsuario)
+                .stream()
+                .sorted((a, b) -> {
+                    if (a.getFechaSolicitud() == null && b.getFechaSolicitud() == null) return 0;
+                    if (a.getFechaSolicitud() == null) return 1;
+                    if (b.getFechaSolicitud() == null) return -1;
+                    int cmp = b.getFechaSolicitud().compareTo(a.getFechaSolicitud());
+                    if (cmp != 0) return cmp;
+                    // desempate por idSolicitud DESC para orden estable
+                    if (a.getIdSolicitud() == null && b.getIdSolicitud() == null) return 0;
+                    if (a.getIdSolicitud() == null) return 1;
+                    if (b.getIdSolicitud() == null) return -1;
+                    return b.getIdSolicitud().compareTo(a.getIdSolicitud());
+                })
+                .collect(java.util.stream.Collectors.toList());
     }
 
     // trae las solicitudes de una carga especifica
@@ -349,6 +377,21 @@ public class SolicitudReporteService {
         }
 
         return solicitudReporteJpaRepository.save(solicitud);
+    }
+
+    // lista todas las solicitudes del sistema ordenadas por fecha descendente
+    // usado exclusivamente por el dashboard de administrador para métricas y actividad global
+    @Transactional(readOnly = true)
+    public List<SolicitudReporteJpa> listarTodasLasSolicitudes() {
+        return solicitudReporteJpaRepository.findAll()
+                .stream()
+                .sorted((a, b) -> {
+                    if (a.getFechaSolicitud() == null && b.getFechaSolicitud() == null) return 0;
+                    if (a.getFechaSolicitud() == null) return 1;
+                    if (b.getFechaSolicitud() == null) return -1;
+                    return b.getFechaSolicitud().compareTo(a.getFechaSolicitud());
+                })
+                .collect(java.util.stream.Collectors.toList());
     }
 
     // un simple helper para ver si el rol es uno o sea administrador

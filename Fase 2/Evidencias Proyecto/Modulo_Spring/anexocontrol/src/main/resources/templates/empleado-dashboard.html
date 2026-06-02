@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AnexoControl | Panel de Control</title>
+    <title>AnexoControl | Mi Panel</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=JetBrains+Mono:wght@100..800&display=swap">
@@ -16,6 +16,7 @@
 
     <!-- ═══════════════════════════════
          SIDEBAR
+         Sin enlace a Usuarios (solo rol admin lo ve)
          ═══════════════════════════════ -->
     <aside class="sidebar">
         <div class="brand">
@@ -29,9 +30,6 @@
             </a>
             <a class="nav-link" th:href="@{/reportes}" href="/reportes">
                 <span class="material-symbols-outlined">description</span><span>Solicitud de Reportes</span>
-            </a>
-            <a class="nav-link" th:href="@{/usuarios}" href="/usuarios">
-                <span class="material-symbols-outlined">group</span><span>Usuarios</span>
             </a>
             <a class="nav-link" th:href="@{/cuenta}" href="/cuenta">
                 <span class="material-symbols-outlined">settings</span><span>Configuración</span>
@@ -56,7 +54,7 @@
         <header class="topbar">
             <div class="search-box">
                 <span class="material-symbols-outlined">search</span>
-                <input type="text" placeholder="Buscar reportes, usuarios..." aria-label="Buscar">
+                <input type="text" placeholder="Buscar mis reportes..." aria-label="Buscar">
             </div>
             <div class="topbar-actions">
                 <a class="icon-button" th:href="@{/cuenta}" href="/cuenta" aria-label="Configuracion">
@@ -64,8 +62,8 @@
                 </a>
                 <div class="user-chip">
                     <div class="user-chip-text">
-                        <span class="user-name"  th:text="${nombreUsuario} ?: 'Administrador'">Administrador</span>
-                        <span class="user-role"  th:text="${rolUsuario}    ?: 'Sistema'">Sistema</span>
+                        <span class="user-name" th:text="${nombreUsuario} ?: 'Usuario'">Usuario</span>
+                        <span class="user-role" th:text="${rolUsuario}    ?: 'Empleado'">Empleado</span>
                     </div>
                     <div class="avatar-placeholder">
                         <span class="material-symbols-outlined">person</span>
@@ -78,8 +76,8 @@
 
             <div class="page-header">
                 <div>
-                    <h2 class="page-title">Panel de Control</h2>
-                    <p class="page-subtitle">Gestión del sistema de tarificación y monitoreo de procesamiento.</p>
+                    <h2 class="page-title">Mi Panel</h2>
+                    <p class="page-subtitle">Resumen de tus solicitudes y actividad reciente.</p>
                 </div>
                 <div class="actions-row page-actions">
                     <a class="btn btn-primary" th:href="@{/reportes}" href="/reportes">
@@ -89,13 +87,14 @@
             </div>
 
             <!-- ══════════════════════════════════════════════════════
-                 SECCIÓN 1 — RESUMEN DEL SISTEMA (métricas globales)
-                 Fuente: listarTodasLasSolicitudes() + mostrarTodosLosUsuarios()
+                 SECCIÓN 1 — RESUMEN DE MI ACTIVIDAD (solo usuario autenticado)
+                 Variables: totalReportes, solicitudesPendientes, erroresProcesamiento
+                 Fuente: listarPorUsuarioConPermiso() del empleado autenticado
                  ══════════════════════════════════════════════════════ -->
             <div style="margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--border-soft);">
                 <p style="margin: 0; font-family: 'JetBrains Mono', monospace; font-size: 11px;
                            letter-spacing: 0.20em; text-transform: uppercase; color: var(--cyan);">
-                    Resumen del Sistema
+                    Resumen de Mi Actividad
                 </p>
             </div>
 
@@ -103,10 +102,10 @@
                 <article class="card metric-card">
                     <div class="metric-header">
                         <span class="material-symbols-outlined metric-icon">analytics</span>
-                        <span class="metric-tag">Global</span>
+                        <span class="metric-tag">Actualizado</span>
                     </div>
-                    <p class="metric-title">Reportes Generados</p>
-                    <p class="metric-value" th:text="${totalReportesSistema} ?: '0'">0</p>
+                    <p class="metric-title">Mis Reportes Generados</p>
+                    <p class="metric-value" th:text="${totalReportes} ?: '0'">0</p>
                 </article>
 
                 <article class="card metric-card">
@@ -114,8 +113,8 @@
                         <span class="material-symbols-outlined metric-icon" style="color: var(--yellow);">pending_actions</span>
                         <span class="metric-tag" style="color: var(--yellow);">Pendientes</span>
                     </div>
-                    <p class="metric-title">Solicitudes Pendientes</p>
-                    <p class="metric-value warning" th:text="${solicitudesPendientesSistema} ?: '0'">0</p>
+                    <p class="metric-title">Mis Solicitudes Pendientes</p>
+                    <p class="metric-value warning" th:text="${solicitudesPendientes} ?: '0'">0</p>
                 </article>
 
                 <article class="card metric-card">
@@ -123,130 +122,15 @@
                         <span class="material-symbols-outlined metric-icon" style="color: var(--red);">warning</span>
                         <span class="metric-tag" style="color: var(--red);">Crítico</span>
                     </div>
-                    <p class="metric-title">Errores de Procesamiento</p>
-                    <p class="metric-value danger" th:text="${erroresSistema} ?: '0'">0</p>
-                </article>
-
-                <article class="card metric-card">
-                    <div class="metric-header">
-                        <span class="material-symbols-outlined metric-icon">group</span>
-                        <span class="metric-tag">Sistema</span>
-                    </div>
-                    <p class="metric-title">Usuarios Registrados</p>
-                    <p class="metric-value cyan" th:text="${totalUsuariosSistema} ?: '0'">0</p>
-                </article>
-            </div>
-
-            <!-- ══════════════════════════════════════════════════════
-                 SECCIÓN 2 — RESUMEN DEL USUARIO (métricas propias)
-                 Fuente: listarPorUsuarioConPermiso() del admin autenticado
-                 ══════════════════════════════════════════════════════ -->
-            <div style="margin: 28px 0 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border-soft);">
-                <p style="margin: 0; font-family: 'JetBrains Mono', monospace; font-size: 11px;
-                           letter-spacing: 0.20em; text-transform: uppercase; color: var(--cyan);">
-                    Resumen del Usuario
-                </p>
-            </div>
-
-            <div class="metrics-grid">
-                <article class="card metric-card">
-                    <div class="metric-header">
-                        <span class="material-symbols-outlined metric-icon">task_alt</span>
-                        <span class="metric-tag">Mis datos</span>
-                    </div>
-                    <p class="metric-title">Mis Reportes Generados</p>
-                    <p class="metric-value" th:text="${misTotalReportes} ?: '0'">0</p>
-                </article>
-
-                <article class="card metric-card">
-                    <div class="metric-header">
-                        <span class="material-symbols-outlined metric-icon" style="color: var(--yellow);">pending_actions</span>
-                        <span class="metric-tag" style="color: var(--yellow);">Mis datos</span>
-                    </div>
-                    <p class="metric-title">Mis Solicitudes Pendientes</p>
-                    <p class="metric-value warning" th:text="${misSolicitudesPendientes} ?: '0'">0</p>
-                </article>
-
-                <article class="card metric-card">
-                    <div class="metric-header">
-                        <span class="material-symbols-outlined metric-icon" style="color: var(--red);">warning</span>
-                        <span class="metric-tag" style="color: var(--red);">Mis datos</span>
-                    </div>
                     <p class="metric-title">Mis Errores</p>
-                    <p class="metric-value danger" th:text="${misErrores} ?: '0'">0</p>
+                    <p class="metric-value danger" th:text="${erroresProcesamiento} ?: '0'">0</p>
                 </article>
             </div>
 
-            <!-- Tabla: mis últimas 5 solicitudes -->
-            <article class="card table-panel" style="margin-bottom: 36px;">
-                <div class="card-header">
-                    <h3 class="card-title">
-                        <span class="material-symbols-outlined">manage_accounts</span>
-                        Mis Últimas Solicitudes
-                    </h3>
-                </div>
-                <div class="table-wrap">
-                    <table class="dashboard-table">
-                        <thead>
-                        <tr>
-                            <th>ID Solicitud</th>
-                            <th>ID Carga</th>
-                            <th>Tipo</th>
-                            <th>Estado</th>
-                            <th>Fecha</th>
-                            <th>Acción</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr th:each="s : ${misUltimasSolicitudes}">
-                            <td class="table-id" th:text="'#' + ${s.idSolicitud}">#1</td>
-                            <td th:text="${s.idCarga}">—</td>
-                            <td>
-                                <span class="type-badge"
-                                      th:text="${s.idTipoReporte == 1 ? 'PDF' : 'CSV'}">CSV</span>
-                            </td>
-                            <td>
-                                <span class="status-badge"
-                                      th:classappend="${s.estadoSolicitado == 'LISTO'}    ? ' listo'    :
-                                                      (${s.estadoSolicitado == 'ERROR'}    ? ' error'    : ' pendiente')"
-                                      th:text="${s.estadoSolicitado}">LISTO</span>
-                            </td>
-                            <td th:text="${s.fechaSolicitud}">—</td>
-                            <td>
-                                <a class="table-link"
-                                   th:if="${s.estadoSolicitado == 'LISTO'}"
-                                   th:href="@{/web/descargar/{id}(id=${s.idSolicitud})}">
-                                    <span class="material-symbols-outlined">download</span>Descargar
-                                </a>
-                                <span class="table-link warning"
-                                      th:if="${s.estadoSolicitado == 'PENDIENTE'}">
-                                    <span class="material-symbols-outlined">hourglass_empty</span>Esperando
-                                </span>
-                                <a class="table-link danger"
-                                   th:if="${s.estadoSolicitado == 'ERROR'}"
-                                   th:href="@{/error/solicitud-con-error}"
-                                   href="/error/solicitud-con-error">
-                                    <span class="material-symbols-outlined">error_outline</span>Error
-                                </a>
-                            </td>
-                        </tr>
-                        <tr th:if="${misUltimasSolicitudes == null or #lists.isEmpty(misUltimasSolicitudes)}">
-                            <td colspan="6"
-                                style="text-align: center; color: var(--text-muted);
-                                       font-family: 'JetBrains Mono', monospace; font-size: 12px;
-                                       padding: 24px;">
-                                No tienes solicitudes registradas.
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </article>
-
             <!-- ══════════════════════════════════════════════════════
-                 SECCIÓN 3 — ACTIVIDAD RECIENTE GLOBAL
-                 Fuente: actividadGlobal (top 10 del sistema, todos los estados, todos los usuarios)
-                 idUsuario NO se muestra — SolicitudReporteJpa no tiene nombreUsuario
+                 SECCIÓN 2 — MI ACTIVIDAD RECIENTE
+                 Variables: solicitudes (top 10 del usuario, todos los estados)
+                 No se muestra idUsuario en ningún lugar
                  ══════════════════════════════════════════════════════ -->
             <div style="margin: 28px 0 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border-soft);">
                 <p style="margin: 0; font-family: 'JetBrains Mono', monospace; font-size: 11px;
@@ -261,11 +145,11 @@
                     <div class="card-header">
                         <h3 class="card-title">
                             <span class="material-symbols-outlined">data_usage</span>
-                            Actividad del Sistema
+                            Mi Actividad Reciente
                         </h3>
                     </div>
                     <div class="activity-list">
-                        <div th:each="s : ${actividadGlobal}" class="activity-item">
+                        <div th:each="s : ${solicitudes}" class="activity-item">
                             <span class="activity-dot"
                                   th:classappend="${s.estadoSolicitado == 'ERROR'}     ? ' muted' :
                                                   (${s.estadoSolicitado == 'PENDIENTE'} ? ' muted' : '')">
@@ -285,22 +169,22 @@
                             </div>
                         </div>
                         <div class="activity-item"
-                             th:if="${actividadGlobal == null or #lists.isEmpty(actividadGlobal)}">
+                             th:if="${solicitudes == null or #lists.isEmpty(solicitudes)}">
                             <span class="activity-dot muted"></span>
                             <div>
-                                <p>No hay actividad reciente en el sistema.</p>
+                                <p>No tienes actividad reciente.</p>
                             </div>
                         </div>
                     </div>
                 </article>
             </div>
 
-            <!-- Tabla global: últimas 10 solicitudes del sistema -->
+            <!-- Tabla: mis últimas solicitudes -->
             <article class="card table-panel">
                 <div class="card-header">
                     <h3 class="card-title">
                         <span class="material-symbols-outlined">table</span>
-                        Últimas Solicitudes del Sistema
+                        Mis Últimas Solicitudes
                     </h3>
                 </div>
                 <div class="table-wrap">
@@ -316,7 +200,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <tr th:each="s : ${actividadGlobal}">
+                        <tr th:each="s : ${solicitudes}">
                             <td class="table-id" th:text="'#' + ${s.idSolicitud}">#1</td>
                             <td th:text="${s.idCarga}">—</td>
                             <td>
@@ -348,19 +232,19 @@
                                 </a>
                             </td>
                         </tr>
-                        <tr th:if="${actividadGlobal == null or #lists.isEmpty(actividadGlobal)}">
+                        <tr th:if="${solicitudes == null or #lists.isEmpty(solicitudes)}">
                             <td colspan="6"
                                 style="text-align: center; color: var(--text-muted);
                                        font-family: 'JetBrains Mono', monospace; font-size: 12px;
                                        padding: 24px;">
-                                No hay solicitudes en el sistema.
+                                No tienes solicitudes registradas.
                             </td>
                         </tr>
                         </tbody>
                     </table>
                 </div>
                 <div class="table-footer">
-                    <span>Mostrando las últimas 10 solicitudes del sistema</span>
+                    <span>Mostrando tus últimas 10 solicitudes</span>
                     <span>›</span>
                 </div>
             </article>
