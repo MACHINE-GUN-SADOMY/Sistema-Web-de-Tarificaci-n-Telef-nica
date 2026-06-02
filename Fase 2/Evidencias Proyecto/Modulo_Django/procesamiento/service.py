@@ -9,6 +9,10 @@ from .orm import (existTipoReporteById, existUsuarioById, findSolicitudReporteBy
                   existReporteTarificacionById, eliminarReporteTarificacionPorIdReporte,
                   mostrarTarificacionPorIdReporte, mostrarTarificacionPorIdCarga)
 
+# limite de registros por archivo para el MVP
+# cambiar este valor cuando se escale el sistema
+MAX_REGISTROS_ARCHIVO = 100
+
 # Mostrar todas las tarififaciones
 def mostrarTarificaciones():
     reportes = mostrarTodasLasTarificaciones()
@@ -67,6 +71,19 @@ def procesarArchivoTarificarCarga(data):
     # la limpieza es obligatoria porque los usuarios suelen subir archivos con lineas vacias al final, llamadas repetidas o espacios extras
     # en los textos. si no limpiamos esto, nos llenariamos de registros duplicados que alterarian los calculos de costos de las llamadas.
     dataframe_limpio = procesador.limpiarDatos(dataframe)
+
+    # contamos sobre el dataframe ya limpio (sin filas vacias ni duplicados) para
+    # reflejar exactamente los registros que se intentarian insertar en la BD.
+    # si superan el limite, notificamos a Spring con estado ERROR y detenemos todo
+    # sin tocar la base de datos.
+    total_registros = len(dataframe_limpio)
+    if total_registros > MAX_REGISTROS_ARCHIVO:
+        mensaje_limite = (
+            f"El archivo supera el limite permitido de {MAX_REGISTROS_ARCHIVO} "
+            f"registros para el MVP. El archivo contiene {total_registros} registros."
+        )
+        SpringCallbackService().notificarError(id_solicitud, mensaje_limite)
+        raise serializers.ValidationError(mensaje_limite)
 
     # convertimos las filas planas del csv en instancias del modelo de django (registrollamada), validando que las llaves foraneas existan.
     # ojo: aca todavia no tocamos la base de datos, solo creamos los objetos en memoria para no saturar la conexion.

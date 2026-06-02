@@ -5,14 +5,11 @@ import cl.anexocontrol.SolicitudReporte.Client.ProcesamientoClient;
 import cl.anexocontrol.SolicitudReporte.Controller.Dto.Request.ActualizarEstadoSolicitudRequest;
 import cl.anexocontrol.SolicitudReporte.Controller.Dto.Request.ProcesamientoCallbackRequest;
 import cl.anexocontrol.SolicitudReporte.Controller.Dto.Request.ProcesarArchivoRequest;
-import cl.anexocontrol.SolicitudReporte.Controller.Dto.Request.SolicitudReporteCallbackRequest;
-import cl.anexocontrol.SolicitudReporte.Controller.ProcesamientoCallbackController;
 import cl.anexocontrol.SolicitudReporte.Repository.Jpa.SolicitudReporteJpa;
 import cl.anexocontrol.SolicitudReporte.Repository.SolicitudReporteJpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import cl.anexocontrol.Archivo.Service.ArchivoService;
-import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.Path;
@@ -37,9 +34,9 @@ public class SolicitudReporteService {
         this.procesamientoClient = procesamientoClient;
     }
 
-    // metodo para crear una nueva solicitud vinculada a un archivo y notificar al procesamiento
+    // flujo principal: archivo -> solicitud -> django -> listo o error.
     public SolicitudReporteJpa solicitarReporte(MultipartFile archivo, Long idUsuario, Integer idTipoReporte) {
-        // validamos que los datos obligatorios esten presentes
+        // se valida lo minimo antes de crear la carga.
         if (idUsuario == null) {
             throw new RuntimeException("El id de usuario es obligatorio");
         }
@@ -48,13 +45,13 @@ public class SolicitudReporteService {
             throw new RuntimeException("El tipo de reporte es obligatorio");
         }
 
-        // generamos un id unico de carga para el lote de archivos
+        // la carga agrupa el archivo y los registros que saldran de el.
         Long idCarga = generarIdCarga();
 
-        // guardamos el archivo y capturamos la ruta donde quedo almacenado
+        // el archivo queda guardado antes de avisarle a django donde leerlo.
         String rutaArchivo = archivoService.guardarArchivo(archivo, idCarga);
 
-        // preparamos la entidad con el estado inicial en PENDIENTE
+        // la solicitud parte pendiente mientras django procesa el archivo.
         SolicitudReporteJpa solicitud = new SolicitudReporteJpa();
         solicitud.setIdCarga(idCarga);
         solicitud.setFechaSolicitud(LocalDateTime.now());
@@ -63,10 +60,10 @@ public class SolicitudReporteService {
         solicitud.setIdUsuario(idUsuario);
         solicitud.setIdTipoReporte(idTipoReporte);
 
-        // guardamos la solicitud para obtener el ID generado por la base de datos
+        // se guarda primero para mandar a django el id real de solicitud.
         SolicitudReporteJpa solicitudGuardada = solicitudReporteJpaRepository.save(solicitud);
 
-        // preparamos el objeto para notificar al modulo de procesamiento Python/Django
+        // este request conecta spring con el modulo django de procesamiento.
         ProcesarArchivoRequest procesarArchivoRequest = ProcesarArchivoRequest.builder()
                 .idSolicitud(solicitudGuardada.getIdSolicitud())
                 .idCarga(solicitudGuardada.getIdCarga())
@@ -75,10 +72,8 @@ public class SolicitudReporteService {
                 .rutaArchivo(rutaArchivo)
                 .build();
 
-        // enviamos la notificacion para que comience el procesamiento del archivo
+        // django procesa el archivo; si responde bien dejamos la solicitud lista.
         try {
-            // enviamos la notificacion para que comience el procesamiento del archivo
-            // si Django responde 200, asumimos que procesó y generó el reporte
             procesamientoClient.notificarArchivoListo(procesarArchivoRequest);
 
             String rutaReporte = construirRutaReporte(rutaArchivo, idCarga, idTipoReporte);
@@ -87,8 +82,8 @@ public class SolicitudReporteService {
             solicitudGuardada.setRutaReporte(rutaReporte);
 
             return solicitudReporteJpaRepository.save(solicitudGuardada);
-
         } catch (Exception exception) {
+            // si django falla, dejamos la solicitud marcada como error para la vista.
             solicitudGuardada.setEstadoSolicitado(EstadoSolicitudEnum.ERROR.name());
             solicitudGuardada.setRutaReporte("ERROR");
 
@@ -96,7 +91,7 @@ public class SolicitudReporteService {
         }
     }
 
-    // helper para generar un id de carga usando una secuencia de Oracle
+    // helper para generar un id de carga usando una secuencia de oracle
     private Long generarIdCarga() {
         return jdbcTemplate.queryForObject(
                 "SELECT seq_carga.NEXTVAL FROM dual", Long.class);
@@ -130,7 +125,7 @@ public class SolicitudReporteService {
         return solicitud;
     }
 
-    // lista todas las solicitudes de un usuario sin importar permisos, ordenadas por fecha DESC
+    // lista solicitudes de un usuario, dejando las mas nuevas arriba.
     @Transactional(readOnly = true)
     public List<SolicitudReporteJpa> listarPorUsuario(Long idUsuario) {
         if (idUsuario == null) {
@@ -145,7 +140,7 @@ public class SolicitudReporteService {
                     if (b.getFechaSolicitud() == null) return -1;
                     int cmp = b.getFechaSolicitud().compareTo(a.getFechaSolicitud());
                     if (cmp != 0) return cmp;
-                    // desempate por idSolicitud DESC para orden estable
+                    // si tienen la misma fecha, gana el id mas nuevo para mantener orden estable.
                     if (a.getIdSolicitud() == null && b.getIdSolicitud() == null) return 0;
                     if (a.getIdSolicitud() == null) return 1;
                     if (b.getIdSolicitud() == null) return -1;
@@ -154,7 +149,7 @@ public class SolicitudReporteService {
                 .collect(java.util.stream.Collectors.toList());
     }
 
-    // lista las solicitudes de un usuario verificando quien las pide, ordenadas por fecha DESC
+    // lista solicitudes con permiso, tambien dejando las mas nuevas arriba.
     @Transactional(readOnly = true)
     public List<SolicitudReporteJpa> listarPorUsuarioConPermiso(Long idUsuario, Long idUsuarioSolicitante,
             Long idRolSolicitante) {
@@ -169,7 +164,7 @@ public class SolicitudReporteService {
                     if (b.getFechaSolicitud() == null) return -1;
                     int cmp = b.getFechaSolicitud().compareTo(a.getFechaSolicitud());
                     if (cmp != 0) return cmp;
-                    // desempate por idSolicitud DESC para orden estable
+                    // si tienen la misma fecha, gana el id mas nuevo para mantener orden estable.
                     if (a.getIdSolicitud() == null && b.getIdSolicitud() == null) return 0;
                     if (a.getIdSolicitud() == null) return 1;
                     if (b.getIdSolicitud() == null) return -1;
@@ -330,27 +325,27 @@ public class SolicitudReporteService {
     @Transactional
     public SolicitudReporteJpa procesarCallback(ProcesamientoCallbackRequest request) {
 
-        // Validar id solicitud
+        // valida que venga el id de solicitud.
         if (request.getIdSolicitud() == null) {
             throw new RuntimeException("El id de la solicitud no puede ser nulo");
         }
 
-        // Validar estado
+        // valida que venga un estado para aplicar.
         if (request.getEstadoSolicitado() == null || request.getEstadoSolicitado().isBlank()) {
             throw new RuntimeException("El estado de solicitud es obligatorio");
         }
 
-        // Normalizar estado
+        // normaliza el estado para compararlo sin depender de mayusculas.
         String estado = request.getEstadoSolicitado().trim().toUpperCase();
 
-        // Validar que el estado sea permitido
+        // revisa que el estado exista en el enum.
         validarEstado(estado);
 
-        // Buscar solicitud
+        // busca la solicitud que django esta avisando.
         SolicitudReporteJpa solicitud = solicitudReporteJpaRepository.findById(request.getIdSolicitud())
                 .orElseThrow(() -> new RuntimeException("Solicitud de reporte no encontrada"));
 
-        // Caso LISTO
+        // caso listo: exige ruta porque ya deberia existir el reporte.
         if ("LISTO".equals(estado)) {
 
             if (request.getRutaReporte() == null || request.getRutaReporte().isBlank()) {
@@ -361,13 +356,13 @@ public class SolicitudReporteService {
             solicitud.setRutaReporte(request.getRutaReporte());
         }
 
-        // Caso ERROR
+        // caso error: deja una marca simple para la vista.
         else if ("ERROR".equals(estado)) {
             solicitud.setEstadoSolicitado(estado);
             solicitud.setRutaReporte("ERROR");
         }
 
-        // Otros estados validos, por si quieres permitir GENERANDO o PENDIENTE
+        // otros estados validos se guardan sin forzar ruta.
         else {
             solicitud.setEstadoSolicitado(estado);
 
@@ -379,8 +374,8 @@ public class SolicitudReporteService {
         return solicitudReporteJpaRepository.save(solicitud);
     }
 
-    // lista todas las solicitudes del sistema ordenadas por fecha descendente
-    // usado exclusivamente por el dashboard de administrador para métricas y actividad global
+    // trae todo el sistema para el dashboard admin.
+    // el orden ayuda a mostrar primero las solicitudes mas nuevas.
     @Transactional(readOnly = true)
     public List<SolicitudReporteJpa> listarTodasLasSolicitudes() {
         return solicitudReporteJpaRepository.findAll()
@@ -394,7 +389,7 @@ public class SolicitudReporteService {
                 .collect(java.util.stream.Collectors.toList());
     }
 
-    // un simple helper para ver si el rol es uno o sea administrador
+    // helper simple para saber si el rol corresponde a admin.
     private boolean esAdministrador(Long idRolSolicitante) {
         return idRolSolicitante != null && idRolSolicitante.equals(1L);
     }
@@ -423,4 +418,7 @@ public class SolicitudReporteService {
     }
 
 }
+
+
+
 

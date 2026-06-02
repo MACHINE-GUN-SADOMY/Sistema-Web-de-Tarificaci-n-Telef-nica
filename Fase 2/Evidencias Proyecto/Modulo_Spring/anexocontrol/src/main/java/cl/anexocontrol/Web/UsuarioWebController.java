@@ -62,7 +62,7 @@ public class UsuarioWebController {
             request.setIdRol(idRol);
 
             usuarioService.registrarUsuario(request);
-            redirectAttributes.addFlashAttribute("msg", "Usuario registrado. Inicia sesión.");
+            redirectAttributes.addFlashAttribute("msg", "Usuario registrado. Inicia sesiÃ³n.");
             return "redirect:/login";
         } catch (RuntimeException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());

@@ -32,9 +32,8 @@ public class SolicitudReporteWebController {
         this.solicitudReporteService = solicitudReporteService;
     }
 
-    // POST /web/crear-solicitud
-    // Formulario: solicitud-reportes.html → th:action="@{/web/crear-solicitud}"
-    // Campos: archivo (MultipartFile), idUsuario (hidden desde sesion), idTipoReporte (select)
+    // este controller se usa para formularios html, no para api json.
+    // /web/crear-solicitud recibe el form visual y vuelve a /reportes.
     @PostMapping("/crear-solicitud")
     public String crearSolicitud(@RequestParam MultipartFile archivo,
                                   @RequestParam Long idUsuario,
@@ -50,10 +49,8 @@ public class SolicitudReporteWebController {
         }
     }
 
-    // GET /web/descargar/{idSolicitud}
-    // Descarga el reporte si existe; si falla redirige a pantalla de error visual.
-    // Los links HTML deben apuntar a este endpoint (no al REST directo).
-    // Los ids de usuario/rol se obtienen de la sesion para no exponerlos en la URL.
+    // descarga desde el flujo web y usa la sesion para validar permisos.
+    // si algo falla, manda a una pantalla visual de error.
     @GetMapping("/descargar/{idSolicitud}")
     public void descargar(@PathVariable Long idSolicitud,
                            HttpSession session,
@@ -88,3 +85,4 @@ public class SolicitudReporteWebController {
         }
     }
 }
+

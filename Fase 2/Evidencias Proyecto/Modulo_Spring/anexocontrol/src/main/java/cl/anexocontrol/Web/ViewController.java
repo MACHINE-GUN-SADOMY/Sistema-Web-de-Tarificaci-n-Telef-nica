@@ -26,16 +26,9 @@ public class ViewController {
         this.usuarioService = usuarioService;
         this.solicitudReporteService = solicitudReporteService;
     }
-
-    // ─────────────────────────────────────────────
-    // Helpers de sesión y entidad
-    // ─────────────────────────────────────────────
-
-    /**
-     * Extrae un Long de sesion de forma segura.
-     * Acepta que el valor este guardado como Long, Integer o cualquier Number
-     * (evita ClassCastException si la sesion guardo un Integer).
-     */
+    // helpers de sesion
+    // toma numeros guardados en sesion y los deja como long.
+    // asi no falla si el dato viene como integer u otro number.
     private Long sessionLong(HttpSession session, String key) {
         Object val = session.getAttribute(key);
         if (val instanceof Number) {
@@ -43,12 +36,8 @@ public class ViewController {
         }
         return null;
     }
-
-    /**
-     * Lee idRolSolicitante con fallback a idRol.
-     * Algunos flujos del proyecto guardan el rol como "idRol" en lugar de "idRolSolicitante".
-     * Se intenta primero "idRolSolicitante"; si viene null se intenta "idRol".
-     */
+    // busca primero idrolsolicitante y despues idrol.
+    // se usa porque algunos flujos guardan el rol con nombres distintos.
     private Long resolverRol(HttpSession session) {
         Long rol = sessionLong(session, "idRolSolicitante");
         if (rol == null) {
@@ -56,14 +45,15 @@ public class ViewController {
         }
         return rol;
     }
-
+    // deja los datos de sesion listos para que thymeleaf los use en las vistas.
+    // tambien agrega idrol como alias para mantener compatibilidad con templates.
     private void addSessionToModel(Model model, HttpSession session) {
         Long idUsuario        = sessionLong(session, "idUsuario");
         Long idRolSolicitante = resolverRol(session);
 
         model.addAttribute("idUsuario",        idUsuario);
         model.addAttribute("idRolSolicitante", idRolSolicitante);
-        model.addAttribute("idRol",            idRolSolicitante);   // alias por compatibilidad
+        model.addAttribute("idRol",            idRolSolicitante);   // alias para templates antiguos
         model.addAttribute("nombreUsuario",    session.getAttribute("nombreUsuario"));
         model.addAttribute("rolUsuario",       session.getAttribute("nombreRol"));
     }
@@ -86,10 +76,7 @@ public class ViewController {
             // fallback visual activo
         }
     }
-
-    // ─────────────────────────────────────────────
-    // Vistas públicas
-    // ─────────────────────────────────────────────
+    // vistas publicas
 
     @GetMapping({"/", "/login"})
     public String login() {
@@ -101,22 +88,18 @@ public class ViewController {
         return "empleado-admin-registrar-usuario";
     }
 
-    // ─────────────────────────────────────────────
-    // Dashboard — ruta única, template según rol
-    // ─────────────────────────────────────────────
-
     @GetMapping("/dashboard")
     public String dashboard(Model model, HttpSession session) {
         Long idUsuario        = sessionLong(session, "idUsuario");
         Long idRolSolicitante = resolverRol(session);
 
-        // sin sesion valida, redirigir a login
+        // sin sesion valida se vuelve al login.
         if (idUsuario == null || idRolSolicitante == null) {
             return "redirect:/login";
         }
 
         addSessionToModel(model, session);
-
+        // el admin ve datos globales y propios; el empleado solo datos propios.
         if (Long.valueOf(1L).equals(idRolSolicitante)) {
             cargarDashboardAdmin(model, idUsuario, idRolSolicitante);
             return "admin-dashboard";
@@ -125,31 +108,13 @@ public class ViewController {
         cargarDashboardEmpleado(model, idUsuario, idRolSolicitante);
         return "empleado-dashboard";
     }
-
-    /**
-     * Dashboard ADMINISTRADOR
-     *
-     * Sección 1 — Resumen del Sistema:
-     *   totalReportesSistema, solicitudesPendientesSistema, erroresSistema,
-     *   totalUsuariosSistema
-     *   Fuente: listarTodasLasSolicitudes() → todas las solicitudes, ordenadas DESC
-     *
-     * Sección 2 — Resumen del Usuario:
-     *   misTotalReportes, misSolicitudesPendientes, misErrores,
-     *   misUltimasSolicitudes (límite 5, propias del admin autenticado)
-     *   Fuente: listarPorUsuarioConPermiso() → solo el usuario autenticado
-     *
-     * Sección 3 — Actividad Reciente Global:
-     *   actividadGlobal (límite 10, todos los estados, todos los usuarios)
-     *   Fuente: misma lista del punto 1, ya ordenada
-     */
+    // arma el panel admin mezclando datos del sistema y datos propios.
+    // se cargan separados para que la vista no confunda metricas.
     private void cargarDashboardAdmin(Model model, Long idUsuario, Long idRolSolicitante) {
-
-        // ── Métricas globales + actividad reciente del sistema ─────────────────
         try {
             List<SolicitudReporteJpa> todas =
                     solicitudReporteService.listarTodasLasSolicitudes();
-            // ya viene ordenada por fechaSolicitud DESC desde el service
+            // ya viene ordenada desde el service para mostrar lo mas nuevo primero.
 
             model.addAttribute("totalReportesSistema",
                     todas.stream().filter(s -> "LISTO".equals(s.getEstadoSolicitado())).count());
@@ -160,7 +125,7 @@ public class ViewController {
             model.addAttribute("erroresSistema",
                     todas.stream().filter(s -> "ERROR".equals(s.getEstadoSolicitado())).count());
 
-            // actividad global: primeras 10 de la lista ya ordenada
+            // se toman las primeras 10 porque la lista ya viene ordenada.
             model.addAttribute("actividadGlobal",
                     todas.stream().limit(10).collect(Collectors.toList()));
 
@@ -170,16 +135,14 @@ public class ViewController {
             model.addAttribute("erroresSistema", 0);
             model.addAttribute("actividadGlobal", Collections.emptyList());
         }
-
-        // ── Total usuarios registrados ─────────────────────────────────────────
+        // total de usuarios para el resumen global del admin.
         try {
             model.addAttribute("totalUsuariosSistema",
                     usuarioService.mostrarTodosLosUsuarios(idRolSolicitante).size());
         } catch (RuntimeException e) {
             model.addAttribute("totalUsuariosSistema", 0);
         }
-
-        // ── Métricas y solicitudes propias del admin autenticado ───────────────
+        // si falta sesion, se dejan metricas propias vacias.
         if (idUsuario == null || idRolSolicitante == null) {
             model.addAttribute("misTotalReportes", 0);
             model.addAttribute("misSolicitudesPendientes", 0);
@@ -201,8 +164,7 @@ public class ViewController {
 
             model.addAttribute("misErrores",
                     mias.stream().filter(s -> "ERROR".equals(s.getEstadoSolicitado())).count());
-
-            // últimas 5 propias, ordenadas por fecha DESC
+            // ultimas 5 propias, con las mas nuevas primero.
             List<SolicitudReporteJpa> misUltimas = mias.stream()
                     .sorted((a, b) -> {
                         if (a.getFechaSolicitud() == null && b.getFechaSolicitud() == null) return 0;
@@ -222,16 +184,10 @@ public class ViewController {
             model.addAttribute("misUltimasSolicitudes", Collections.emptyList());
         }
     }
-
-    /**
-     * Dashboard EMPLEADO
-     *
-     * Solo datos del usuario autenticado. No recibe ni calcula ninguna métrica global.
-     *
-     * totalReportes, solicitudesPendientes, erroresProcesamiento,
-     * solicitudes (últimas 10 propias, todos los estados, ordenadas por fecha DESC)
-     */
+    // arma el panel empleado solo con informacion del usuario autenticado.
+    // no carga datos globales porque esta vista es solo de actividad propia.
     private void cargarDashboardEmpleado(Model model, Long idUsuario, Long idRolSolicitante) {
+        // si falta sesion, se dejan metricas propias vacias.
         if (idUsuario == null || idRolSolicitante == null) {
             model.addAttribute("totalReportes", 0);
             model.addAttribute("solicitudesPendientes", 0);
@@ -253,8 +209,7 @@ public class ViewController {
 
             model.addAttribute("erroresProcesamiento",
                     mias.stream().filter(s -> "ERROR".equals(s.getEstadoSolicitado())).count());
-
-            // últimas 10 propias, ordenadas por fecha DESC, todos los estados
+            // ultimas 10 propias, con las mas nuevas primero.
             List<SolicitudReporteJpa> ultimas = mias.stream()
                     .sorted((a, b) -> {
                         if (a.getFechaSolicitud() == null && b.getFechaSolicitud() == null) return 0;
@@ -274,10 +229,7 @@ public class ViewController {
             model.addAttribute("solicitudes", Collections.emptyList());
         }
     }
-
-    // ─────────────────────────────────────────────
-    // Solicitud de Reportes + Historial
-    // ─────────────────────────────────────────────
+    // solicitud de reportes e historial
 
     @GetMapping("/reportes")
     public String solicitudReportes(Model model, HttpSession session) {
@@ -285,7 +237,7 @@ public class ViewController {
 
         Long idUsuario        = sessionLong(session, "idUsuario");
         Long idRolSolicitante = resolverRol(session);
-
+        // la pantalla usa estos datos para el formulario y para listar solicitudes propias.
         model.addAttribute("idUsuario", idUsuario);
         model.addAttribute("idUsuarioSolicitante", idUsuario);
         model.addAttribute("idRolSolicitante", idRolSolicitante);
@@ -301,13 +253,11 @@ public class ViewController {
 
         return "admin-empleado-solicitud-reportes";
     }
-
-    // ─────────────────────────────────────────────
-    // Pantallas de error controlado
-    // ─────────────────────────────────────────────
+    // pantallas de error controlado
 
     @GetMapping("/error/solicitud-con-error")
     public String errorSolicitudConError(Model model, HttpSession session) {
+        // reutiliza el template error para mostrar una salida visual amable.
         addSessionToModel(model, session);
         model.addAttribute("tituloError",  "Error en la Solicitud");
         model.addAttribute("estadoError",  "ERROR");
@@ -319,18 +269,16 @@ public class ViewController {
 
     @GetMapping("/error/reporte-no-disponible")
     public String errorReporteNoDisponible(Model model, HttpSession session) {
+        // mismo template de error, pero con mensaje para descarga no disponible.
         addSessionToModel(model, session);
         model.addAttribute("tituloError",  "Reporte no disponible");
         model.addAttribute("estadoError",  "NO DISPONIBLE");
         model.addAttribute("mensajeError",
-                "El reporte solicitado no existe o ya no está disponible.");
+                "El reporte solicitado no existe o ya no estÃ¡ disponible.");
         model.addAttribute("urlVolver", "/reportes");
         return "error";
     }
-
-    // ─────────────────────────────────────────────
-    // Usuarios
-    // ─────────────────────────────────────────────
+    // usuarios
 
     @GetMapping("/usuarios")
     public String usuarios(Model model, HttpSession session) {
@@ -368,10 +316,7 @@ public class ViewController {
         cargarUsuario(idUsuario, model);
         return "admin-modificar-usuario";
     }
-
-    // ─────────────────────────────────────────────
-    // Cuenta
-    // ─────────────────────────────────────────────
+    // cuenta
 
     @GetMapping("/cuenta")
     public String actualizarCuenta(Model model, HttpSession session) {
@@ -389,10 +334,7 @@ public class ViewController {
 
         return "empleado-actualizar-cuenta";
     }
-
-    // ─────────────────────────────────────────────
-    // Logout provisional
-    // ─────────────────────────────────────────────
+    // logout
 
     @GetMapping("/logout")
     public String logout(HttpSession session) {
@@ -400,3 +342,6 @@ public class ViewController {
         return "redirect:/login";
     }
 }
+
+
+

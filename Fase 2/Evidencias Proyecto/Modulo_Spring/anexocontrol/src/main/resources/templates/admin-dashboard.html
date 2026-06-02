@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -14,16 +14,14 @@
 <body>
 <div class="app-shell">
 
-    <!-- ═══════════════════════════════
-         SIDEBAR
-         ═══════════════════════════════ -->
+    <!-- sidebar -->
     <aside class="sidebar">
         <div class="brand">
             <h1 class="brand-title">AnexoControl</h1>
-            <p class="brand-subtitle">Sistema de Tarificación</p>
+            <p class="brand-subtitle">Sistema de TarificaciÃ³n</p>
         </div>
 
-        <nav class="nav" aria-label="Navegación principal">
+        <nav class="nav" aria-label="NavegaciÃ³n principal">
             <a class="nav-link active" th:href="@{/dashboard}" href="/dashboard">
                 <span class="material-symbols-outlined">dashboard</span><span>Panel Principal</span>
             </a>
@@ -34,7 +32,7 @@
                 <span class="material-symbols-outlined">group</span><span>Usuarios</span>
             </a>
             <a class="nav-link" th:href="@{/cuenta}" href="/cuenta">
-                <span class="material-symbols-outlined">settings</span><span>Configuración</span>
+                <span class="material-symbols-outlined">settings</span><span>ConfiguraciÃ³n</span>
             </a>
         </nav>
 
@@ -43,14 +41,12 @@
                 <span class="material-symbols-outlined">add_chart</span><span>Nueva Solicitud</span>
             </a>
             <a class="nav-link" th:href="@{/logout}" href="/logout">
-                <span class="material-symbols-outlined">logout</span><span>Cerrar Sesión</span>
+                <span class="material-symbols-outlined">logout</span><span>Cerrar SesiÃ³n</span>
             </a>
         </div>
     </aside>
 
-    <!-- ═══════════════════════════════
-         MAIN
-         ═══════════════════════════════ -->
+    <!-- main -->
     <main class="main">
 
         <header class="topbar">
@@ -79,7 +75,7 @@
             <div class="page-header">
                 <div>
                     <h2 class="page-title">Panel de Control</h2>
-                    <p class="page-subtitle">Gestión del sistema de tarificación y monitoreo de procesamiento.</p>
+                    <p class="page-subtitle">GestiÃ³n del sistema de tarificaciÃ³n y monitoreo de procesamiento.</p>
                 </div>
                 <div class="actions-row page-actions">
                     <a class="btn btn-primary" th:href="@{/reportes}" href="/reportes">
@@ -88,10 +84,7 @@
                 </div>
             </div>
 
-            <!-- ══════════════════════════════════════════════════════
-                 SECCIÓN 1 — RESUMEN DEL SISTEMA (métricas globales)
-                 Fuente: listarTodasLasSolicitudes() + mostrarTodosLosUsuarios()
-                 ══════════════════════════════════════════════════════ -->
+            <!-- resumen del sistema: datos globales para admin. -->
             <div style="margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--border-soft);">
                 <p style="margin: 0; font-family: 'JetBrains Mono', monospace; font-size: 11px;
                            letter-spacing: 0.20em; text-transform: uppercase; color: var(--cyan);">
@@ -121,7 +114,7 @@
                 <article class="card metric-card">
                     <div class="metric-header">
                         <span class="material-symbols-outlined metric-icon" style="color: var(--red);">warning</span>
-                        <span class="metric-tag" style="color: var(--red);">Crítico</span>
+                        <span class="metric-tag" style="color: var(--red);">CrÃ­tico</span>
                     </div>
                     <p class="metric-title">Errores de Procesamiento</p>
                     <p class="metric-value danger" th:text="${erroresSistema} ?: '0'">0</p>
@@ -137,10 +130,7 @@
                 </article>
             </div>
 
-            <!-- ══════════════════════════════════════════════════════
-                 SECCIÓN 2 — RESUMEN DEL USUARIO (métricas propias)
-                 Fuente: listarPorUsuarioConPermiso() del admin autenticado
-                 ══════════════════════════════════════════════════════ -->
+            <!-- resumen del usuario: datos propios del admin, separados de lo global. -->
             <div style="margin: 28px 0 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border-soft);">
                 <p style="margin: 0; font-family: 'JetBrains Mono', monospace; font-size: 11px;
                            letter-spacing: 0.20em; text-transform: uppercase; color: var(--cyan);">
@@ -177,12 +167,12 @@
                 </article>
             </div>
 
-            <!-- Tabla: mis últimas 5 solicitudes -->
+            <!-- tabla de solicitudes propias del admin. -->
             <article class="card table-panel" style="margin-bottom: 36px;">
                 <div class="card-header">
                     <h3 class="card-title">
                         <span class="material-symbols-outlined">manage_accounts</span>
-                        Mis Últimas Solicitudes
+                        Mis Ãšltimas Solicitudes
                     </h3>
                 </div>
                 <div class="table-wrap">
@@ -194,13 +184,13 @@
                             <th>Tipo</th>
                             <th>Estado</th>
                             <th>Fecha</th>
-                            <th>Acción</th>
+                            <th>AcciÃ³n</th>
                         </tr>
                         </thead>
                         <tbody>
                         <tr th:each="s : ${misUltimasSolicitudes}">
                             <td class="table-id" th:text="'#' + ${s.idSolicitud}">#1</td>
-                            <td th:text="${s.idCarga}">—</td>
+                            <td th:text="${s.idCarga}">â€”</td>
                             <td>
                                 <span class="type-badge"
                                       th:text="${s.idTipoReporte == 1 ? 'PDF' : 'CSV'}">CSV</span>
@@ -211,7 +201,7 @@
                                                       (${s.estadoSolicitado == 'ERROR'}    ? ' error'    : ' pendiente')"
                                       th:text="${s.estadoSolicitado}">LISTO</span>
                             </td>
-                            <td th:text="${s.fechaSolicitud}">—</td>
+                            <td th:text="${s.fechaSolicitud}">â€”</td>
                             <td>
                                 <a class="table-link"
                                    th:if="${s.estadoSolicitado == 'LISTO'}"
@@ -243,11 +233,7 @@
                 </div>
             </article>
 
-            <!-- ══════════════════════════════════════════════════════
-                 SECCIÓN 3 — ACTIVIDAD RECIENTE GLOBAL
-                 Fuente: actividadGlobal (top 10 del sistema, todos los estados, todos los usuarios)
-                 idUsuario NO se muestra — SolicitudReporteJpa no tiene nombreUsuario
-                 ══════════════════════════════════════════════════════ -->
+            <!-- actividad reciente global: ultimos movimientos del sistema. -->
             <div style="margin: 28px 0 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border-soft);">
                 <p style="margin: 0; font-family: 'JetBrains Mono', monospace; font-size: 11px;
                            letter-spacing: 0.20em; text-transform: uppercase; color: var(--cyan);">
@@ -255,7 +241,7 @@
                 </p>
             </div>
 
-            <!-- Feed de actividad -->
+            <!-- feed global para ver rapido estados recientes. -->
             <div class="dashboard-grid" style="grid-template-columns: 1fr; margin-bottom: 24px;">
                 <article class="card">
                     <div class="card-header">
@@ -272,11 +258,11 @@
                             </span>
                             <div>
                                 <p th:text="'Solicitud #' + ${s.idSolicitud}
-                                            + ' — ' + (${s.idTipoReporte == 1} ? 'PDF' : 'CSV')">
-                                    Solicitud #1 — CSV
+                                            + ' â€” ' + (${s.idTipoReporte == 1} ? 'PDF' : 'CSV')">
+                                    Solicitud #1 â€” CSV
                                 </p>
                                 <div class="activity-meta">
-                                    <span th:text="${s.fechaSolicitud}">—</span>
+                                    <span th:text="${s.fechaSolicitud}">â€”</span>
                                     <span class="mini-badge"
                                           th:classappend="${s.estadoSolicitado == 'LISTO'}  ? ' success' :
                                                           (${s.estadoSolicitado == 'ERROR'} ? ' info'    : '')"
@@ -295,12 +281,12 @@
                 </article>
             </div>
 
-            <!-- Tabla global: últimas 10 solicitudes del sistema -->
+            <!-- tabla de ultimas solicitudes del sistema. -->
             <article class="card table-panel">
                 <div class="card-header">
                     <h3 class="card-title">
                         <span class="material-symbols-outlined">table</span>
-                        Últimas Solicitudes del Sistema
+                        Ãšltimas Solicitudes del Sistema
                     </h3>
                 </div>
                 <div class="table-wrap">
@@ -312,13 +298,13 @@
                             <th>Tipo</th>
                             <th>Estado</th>
                             <th>Fecha</th>
-                            <th>Acción</th>
+                            <th>AcciÃ³n</th>
                         </tr>
                         </thead>
                         <tbody>
                         <tr th:each="s : ${actividadGlobal}">
                             <td class="table-id" th:text="'#' + ${s.idSolicitud}">#1</td>
-                            <td th:text="${s.idCarga}">—</td>
+                            <td th:text="${s.idCarga}">â€”</td>
                             <td>
                                 <span class="type-badge"
                                       th:text="${s.idTipoReporte == 1 ? 'PDF' : 'CSV'}">CSV</span>
@@ -329,7 +315,7 @@
                                                       (${s.estadoSolicitado == 'ERROR'}    ? ' error'    : ' pendiente')"
                                       th:text="${s.estadoSolicitado}">LISTO</span>
                             </td>
-                            <td th:text="${s.fechaSolicitud}">—</td>
+                            <td th:text="${s.fechaSolicitud}">â€”</td>
                             <td>
                                 <a class="table-link"
                                    th:if="${s.estadoSolicitado == 'LISTO'}"
@@ -360,14 +346,14 @@
                     </table>
                 </div>
                 <div class="table-footer">
-                    <span>Mostrando las últimas 10 solicitudes del sistema</span>
-                    <span>›</span>
+                    <span>Mostrando las Ãºltimas 10 solicitudes del sistema</span>
+                    <span>â€º</span>
                 </div>
             </article>
 
             <div class="dashboard-footer">
-                <span>● Conexión segura</span>
-                <span>● Procesamiento optimizado</span>
+                <span>â— ConexiÃ³n segura</span>
+                <span>â— Procesamiento optimizado</span>
             </div>
 
         </section>
