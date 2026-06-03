@@ -16,6 +16,9 @@ import java.util.Collections;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
+// pruebas del routing de vistas en ViewController
+// se mockean session, model y los dos services
+// no hay contexto spring ni conexion a oracle
 @ExtendWith(MockitoExtension.class)
 class ViewControllerTest {
 
@@ -26,14 +29,18 @@ class ViewControllerTest {
 
     @InjectMocks private ViewController viewController;
 
+    // sin stubs en session, todos los getAttribute devuelven null
+    // el controller no tiene usuario ni rol, debe redirigir al login
     @Test
     void dashboard_sinSesion_redirigeALogin() {
-        // sin stubs: session devuelve null en todos los getAttribute → redirige
         String resultado = viewController.dashboard(model, session);
         assertEquals("redirect:/login", resultado);
         System.out.println("TEST sin sesion -> redirect esperado: redirect:/login, obtenido: " + resultado);
     }
 
+    // sesion con idUsuario=1 e idRolSolicitante=1 (admin)
+    // se mockean los tres llamados al service que hace el dashboard admin
+    // el resultado esperado es la vista admin-dashboard
     @Test
     void dashboard_admin_retornaAdminDashboard() {
         when(session.getAttribute("idUsuario")).thenReturn(1L);
@@ -51,6 +58,9 @@ class ViewControllerTest {
         System.out.println("TEST dashboard admin -> vista esperada: admin-dashboard, obtenida: " + resultado);
     }
 
+    // sesion con idRolSolicitante=2 (empleado)
+    // el empleado solo carga sus propias solicitudes, no datos globales
+    // se mockea solo listarPorUsuarioConPermiso con el id del empleado
     @Test
     void dashboard_empleado_retornaEmpleadoDashboard() {
         when(session.getAttribute("idUsuario")).thenReturn(5L);
@@ -64,6 +74,9 @@ class ViewControllerTest {
         System.out.println("TEST dashboard empleado -> vista esperada: empleado-dashboard, obtenida: " + resultado);
     }
 
+    // prueba el GET /reportes con sesion activa
+    // se mockea listarPorUsuarioConPermiso para que no falle al cargar las solicitudes
+    // el resultado esperado es la vista de solicitud de reportes
     @Test
     void solicitudReportes_conSesion_retornaVistaReportes() {
         when(session.getAttribute("idUsuario")).thenReturn(3L);

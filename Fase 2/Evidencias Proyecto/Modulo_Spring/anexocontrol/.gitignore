@@ -62,6 +62,7 @@ db.sqlite3
 *.sqlite3
 media/
 staticfiles/
+RESUMEN_TECNICO_ANEXOCONTROL_DJANGO.md
 
 ### Node / frontend temporal ###
 node_modules/
@@ -89,6 +90,7 @@ Pasted text.txt
 workspace.xml
 tasks.xml
 usage.statistics.xml
+skills-lock.json
 
 ### Archivos generados por AnexoControl ###
 Fase 2/Evidencias Proyecto/Modulo_Spring/anexocontrol/archivos/pendientes/*
