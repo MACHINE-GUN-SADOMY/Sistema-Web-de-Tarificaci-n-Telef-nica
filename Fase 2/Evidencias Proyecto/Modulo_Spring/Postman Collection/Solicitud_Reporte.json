@@ -1,0 +1,236 @@
+{
+  "info": {
+    "_postman_id": "7ba8bd5c-c14f-4c0d-80ac-ba7e4fb9564f",
+    "name": "Solicitud Reporte API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "44411688"
+  },
+  "item": [
+    {
+      "name": "Crear Solicitud (Sube Archivo)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "archivo",
+              "type": "file",
+              "src": "/C:/Users/h8_hate machine/Documents/GitHub/Sistema-Web-de-Tarificaci-n-Telef-nica/Fase 2/Evidencias Proyecto/Modulo_Spring/anexocontrol/archivos/pendientes/carga_1001_prueba.csv"
+            },
+            {
+              "key": "idUsuario",
+              "value": "1",
+              "type": "text"
+            },
+            {
+              "key": "idTipoReporte",
+              "value": "1",
+              "type": "text"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://localhost:8081/solicitud-reporte/crear-solicitud",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8081",
+          "path": [
+            "solicitud-reporte",
+            "crear-solicitud"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Obtener Solicitud por ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8081/solicitud-reporte/obtener-solicitud/1?idUsuarioSolicitante=1&idRolSolicitante=1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8081",
+          "path": [
+            "solicitud-reporte",
+            "obtener-solicitud",
+            "1"
+          ],
+          "query": [
+            {
+              "key": "idUsuarioSolicitante",
+              "value": "1"
+            },
+            {
+              "key": "idRolSolicitante",
+              "value": "1"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Listar Solicitudes por Usuario",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8081/solicitud-reporte/listar-solicitud-por-usuario/1?idUsuarioSolicitante=1&idRolSolicitante=1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8081",
+          "path": [
+            "solicitud-reporte",
+            "listar-solicitud-por-usuario",
+            "1"
+          ],
+          "query": [
+            {
+              "key": "idUsuarioSolicitante",
+              "value": "1"
+            },
+            {
+              "key": "idRolSolicitante",
+              "value": "1"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Listar Solicitudes por Carga",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8081/solicitud-reporte/listar-solicitud-por-carga/1002?idUsuarioSolicitante=2&idRolSolicitante=2",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8081",
+          "path": [
+            "solicitud-reporte",
+            "listar-solicitud-por-carga",
+            "1002"
+          ],
+          "query": [
+            {
+              "key": "idUsuarioSolicitante",
+              "value": "2"
+            },
+            {
+              "key": "idRolSolicitante",
+              "value": "2"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Actualizar Estado de Solicitud",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"estadoSolicitado\": \"LISTO\",\n  \"rutaReporte\": \"C:/anexocontrol/archivos/procesados/reporte_listo.txt\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8081/solicitud-reporte/actualizar-estado-solicitud/1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8081",
+          "path": [
+            "solicitud-reporte",
+            "actualizar-estado-solicitud",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Descargar Reporte (Si esta LISTO)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8081/solicitud-reporte/1/descargar?idUsuarioSolicitante=1&idRolSolicitante=1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8081",
+          "path": [
+            "solicitud-reporte",
+            "1",
+            "descargar"
+          ],
+          "query": [
+            {
+              "key": "idUsuarioSolicitante",
+              "value": "1"
+            },
+            {
+              "key": "idRolSolicitante",
+              "value": "1"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Descargar Reporte",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8081/solicitud-reporte/43/descargar?idUsuarioSolicitante=1&idRolSolicitante=1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8081",
+          "path": [
+            "solicitud-reporte",
+            "43",
+            "descargar"
+          ],
+          "query": [
+            {
+              "key": "idUsuarioSolicitante",
+              "value": "1"
+            },
+            {
+              "key": "idRolSolicitante",
+              "value": "1"
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -18,10 +18,10 @@
     <aside class="sidebar">
         <div class="brand">
             <h1 class="brand-title">AnexoControl</h1>
-            <p class="brand-subtitle">Sistema de TarificaciÃ³n</p>
+            <p class="brand-subtitle">Sistema de Tarificación</p>
         </div>
 
-        <nav class="nav" aria-label="NavegaciÃ³n principal">
+        <nav class="nav" aria-label="Navegación principal">
             <a class="nav-link active" th:href="@{/dashboard}" href="/dashboard">
                 <span class="material-symbols-outlined">dashboard</span><span>Panel Principal</span>
             </a>
@@ -32,7 +32,7 @@
                 <span class="material-symbols-outlined">group</span><span>Usuarios</span>
             </a>
             <a class="nav-link" th:href="@{/cuenta}" href="/cuenta">
-                <span class="material-symbols-outlined">settings</span><span>ConfiguraciÃ³n</span>
+                <span class="material-symbols-outlined">settings</span><span>Configuración</span>
             </a>
         </nav>
 
@@ -41,7 +41,7 @@
                 <span class="material-symbols-outlined">add_chart</span><span>Nueva Solicitud</span>
             </a>
             <a class="nav-link" th:href="@{/logout}" href="/logout">
-                <span class="material-symbols-outlined">logout</span><span>Cerrar SesiÃ³n</span>
+                <span class="material-symbols-outlined">logout</span><span>Cerrar Sesión</span>
             </a>
         </div>
     </aside>
@@ -75,7 +75,7 @@
             <div class="page-header">
                 <div>
                     <h2 class="page-title">Panel de Control</h2>
-                    <p class="page-subtitle">GestiÃ³n del sistema de tarificaciÃ³n y monitoreo de procesamiento.</p>
+                    <p class="page-subtitle">Gestión del sistema de tarificación y monitoreo de procesamiento.</p>
                 </div>
                 <div class="actions-row page-actions">
                     <a class="btn btn-primary" th:href="@{/reportes}" href="/reportes">
@@ -114,7 +114,7 @@
                 <article class="card metric-card">
                     <div class="metric-header">
                         <span class="material-symbols-outlined metric-icon" style="color: var(--red);">warning</span>
-                        <span class="metric-tag" style="color: var(--red);">CrÃ­tico</span>
+                        <span class="metric-tag" style="color: var(--red);">Crítico</span>
                     </div>
                     <p class="metric-title">Errores de Procesamiento</p>
                     <p class="metric-value danger" th:text="${erroresSistema} ?: '0'">0</p>
@@ -172,7 +172,7 @@
                 <div class="card-header">
                     <h3 class="card-title">
                         <span class="material-symbols-outlined">manage_accounts</span>
-                        Mis Ãšltimas Solicitudes
+                        Mis Últimas Solicitudes
                     </h3>
                 </div>
                 <div class="table-wrap">
@@ -184,13 +184,13 @@
                             <th>Tipo</th>
                             <th>Estado</th>
                             <th>Fecha</th>
-                            <th>AcciÃ³n</th>
+                            <th>Acción</th>
                         </tr>
                         </thead>
                         <tbody>
                         <tr th:each="s : ${misUltimasSolicitudes}">
                             <td class="table-id" th:text="'#' + ${s.idSolicitud}">#1</td>
-                            <td th:text="${s.idCarga}">â€”</td>
+                            <td th:text="${s.idCarga}">—</td>
                             <td>
                                 <span class="type-badge"
                                       th:text="${s.idTipoReporte == 1 ? 'PDF' : 'CSV'}">CSV</span>
@@ -201,7 +201,7 @@
                                                       (${s.estadoSolicitado == 'ERROR'}    ? ' error'    : ' pendiente')"
                                       th:text="${s.estadoSolicitado}">LISTO</span>
                             </td>
-                            <td th:text="${s.fechaSolicitud}">â€”</td>
+                            <td th:text="${s.fechaSolicitud}">—</td>
                             <td>
                                 <a class="table-link"
                                    th:if="${s.estadoSolicitado == 'LISTO'}"
@@ -258,11 +258,11 @@
                             </span>
                             <div>
                                 <p th:text="'Solicitud #' + ${s.idSolicitud}
-                                            + ' â€” ' + (${s.idTipoReporte == 1} ? 'PDF' : 'CSV')">
-                                    Solicitud #1 â€” CSV
+                                            + ' — ' + (${s.idTipoReporte == 1} ? 'PDF' : 'CSV')">
+                                    Solicitud #1 — CSV
                                 </p>
                                 <div class="activity-meta">
-                                    <span th:text="${s.fechaSolicitud}">â€”</span>
+                                    <span th:text="${s.fechaSolicitud}">—</span>
                                     <span class="mini-badge"
                                           th:classappend="${s.estadoSolicitado == 'LISTO'}  ? ' success' :
                                                           (${s.estadoSolicitado == 'ERROR'} ? ' info'    : '')"
@@ -286,7 +286,7 @@
                 <div class="card-header">
                     <h3 class="card-title">
                         <span class="material-symbols-outlined">table</span>
-                        Ãšltimas Solicitudes del Sistema
+                        Últimas Solicitudes del Sistema
                     </h3>
                 </div>
                 <div class="table-wrap">
@@ -298,13 +298,13 @@
                             <th>Tipo</th>
                             <th>Estado</th>
                             <th>Fecha</th>
-                            <th>AcciÃ³n</th>
+                            <th>Acción</th>
                         </tr>
                         </thead>
                         <tbody>
                         <tr th:each="s : ${actividadGlobal}">
                             <td class="table-id" th:text="'#' + ${s.idSolicitud}">#1</td>
-                            <td th:text="${s.idCarga}">â€”</td>
+                            <td th:text="${s.idCarga}">—</td>
                             <td>
                                 <span class="type-badge"
                                       th:text="${s.idTipoReporte == 1 ? 'PDF' : 'CSV'}">CSV</span>
@@ -315,7 +315,7 @@
                                                       (${s.estadoSolicitado == 'ERROR'}    ? ' error'    : ' pendiente')"
                                       th:text="${s.estadoSolicitado}">LISTO</span>
                             </td>
-                            <td th:text="${s.fechaSolicitud}">â€”</td>
+                            <td th:text="${s.fechaSolicitud}">—</td>
                             <td>
                                 <a class="table-link"
                                    th:if="${s.estadoSolicitado == 'LISTO'}"
@@ -346,14 +346,14 @@
                     </table>
                 </div>
                 <div class="table-footer">
-                    <span>Mostrando las Ãºltimas 10 solicitudes del sistema</span>
-                    <span>â€º</span>
+                    <span>Mostrando las últimas 10 solicitudes del sistema</span>
+                    <span>›</span>
                 </div>
             </article>
 
             <div class="dashboard-footer">
-                <span>â— ConexiÃ³n segura</span>
-                <span>â— Procesamiento optimizado</span>
+                <span>● Conexión segura</span>
+                <span>● Procesamiento optimizado</span>
             </div>
 
         </section>

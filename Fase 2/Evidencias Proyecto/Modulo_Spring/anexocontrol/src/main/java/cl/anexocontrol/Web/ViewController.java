@@ -274,7 +274,7 @@ public class ViewController {
         model.addAttribute("tituloError",  "Reporte no disponible");
         model.addAttribute("estadoError",  "NO DISPONIBLE");
         model.addAttribute("mensajeError",
-                "El reporte solicitado no existe o ya no estÃ¡ disponible.");
+                "El reporte solicitado no existe o ya no está disponible.");
         model.addAttribute("urlVolver", "/reportes");
         return "error";
     }
