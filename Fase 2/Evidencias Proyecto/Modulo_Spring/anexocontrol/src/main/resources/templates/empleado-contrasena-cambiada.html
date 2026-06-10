@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnexoControl | Contraseña Actualizada</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=JetBrains+Mono:wght@100..800&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap">
+    <link rel="stylesheet" th:href="@{/css/layout.css}" href="/css/layout.css">
+    <link rel="stylesheet" th:href="@{/css/form-pages.css}" href="/css/form-pages.css">
+    <link rel="stylesheet" th:href="@{/css/empleado-contrasena-cambiada.css}" href="/css/empleado-contrasena-cambiada.css">
+</head>
+<body>
+<div class="app-shell">
+    <aside class="sidebar">
+        <div class="brand"><h1 class="brand-title">AnexoControl</h1><p class="brand-subtitle">Sistema de Tarificación</p></div>
+        <nav class="nav">
+            <a class="nav-link" th:href="@{/dashboard}" href="/dashboard"><span class="material-symbols-outlined">dashboard</span>Panel Principal</a>
+            <a class="nav-link" th:href="@{/reportes}" href="/reportes"><span class="material-symbols-outlined">description</span>Solicitud de Reportes</a>
+            <a class="nav-link" th:if="${idRolSolicitante == 1}" th:href="@{/usuarios}" href="/usuarios"><span class="material-symbols-outlined">group</span>Usuarios</a>
+            <a class="nav-link active" th:href="@{/cuenta}" href="/cuenta"><span class="material-symbols-outlined">settings</span>Configuración</a>
+        </nav>
+        <div class="sidebar-bottom"><a class="sidebar-logout" th:href="@{/logout}" href="/logout"><span class="material-symbols-outlined">logout</span>Cerrar Sesión</a></div>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <div class="topbar-actions">
+                <a class="icon-button" th:href="@{/cuenta}" href="/cuenta"><span class="material-symbols-outlined">settings</span></a>
+                <div class="user-chip">
+                    <div class="user-chip-text">
+                        <span class="user-name" th:text="${nombreUsuario} ?: 'Usuario'">Usuario</span>
+                        <span class="user-role" th:text="${rolUsuario} ?: 'Sistema'">Sistema</span>
+                    </div>
+                    <div class="avatar-placeholder"><span class="material-symbols-outlined">person</span></div>
+                </div>
+            </div>
+        </header>
+
+        <section class="content form-layout">
+            <div class="page-header">
+                <div><p class="page-kicker">Cuenta</p><h1 class="page-title">Contraseña Actualizada</h1><p class="page-subtitle">Tu contraseña fue cambiada de forma exitosa.</p></div>
+            </div>
+
+            <div class="card success-card">
+                <span class="material-symbols-outlined success-icon">check_circle</span>
+                <h2 class="success-title">Contraseña actualizada correctamente.</h2>
+                <p class="success-text">Tus cambios fueron guardados y ya puedes continuar usando el sistema.</p>
+                <div class="form-actions success-actions">
+                    <a class="btn btn-secondary" th:href="@{/cuenta}" href="/cuenta">Volver a mi Cuenta</a>
+                    <a class="btn btn-primary" th:href="@{/dashboard}" href="/dashboard">Ir al Dashboard</a>
+                </div>
+            </div>
+
+            <p class="form-footer-note">AnexoControl · Sistema de Tarificación</p>
+        </section>
+    </main>
+</div>
+</body>
+</html>

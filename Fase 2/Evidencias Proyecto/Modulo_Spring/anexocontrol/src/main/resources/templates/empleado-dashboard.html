@@ -47,10 +47,6 @@
     <main class="main">
 
         <header class="topbar">
-            <div class="search-box">
-                <span class="material-symbols-outlined">search</span>
-                <input type="text" placeholder="Buscar mis reportes..." aria-label="Buscar">
-            </div>
             <div class="topbar-actions">
                 <a class="icon-button" th:href="@{/cuenta}" href="/cuenta" aria-label="Configuracion">
                     <span class="material-symbols-outlined">settings</span>
@@ -75,6 +71,16 @@
                     <p class="page-subtitle">Resumen de tus solicitudes y actividad reciente.</p>
                 </div>
                 <div class="actions-row page-actions">
+                    <div class="sort-controls">
+                        <a class="sort-link" th:classappend="${orden == 'desc'} ? ' active'"
+                           th:href="@{/dashboard(orden='desc')}" href="/dashboard?orden=desc">
+                            <span class="material-symbols-outlined">arrow_downward</span>Más recientes
+                        </a>
+                        <a class="sort-link" th:classappend="${orden == 'asc'} ? ' active'"
+                           th:href="@{/dashboard(orden='asc')}" href="/dashboard?orden=asc">
+                            <span class="material-symbols-outlined">arrow_upward</span>Más antiguas
+                        </a>
+                    </div>
                     <a class="btn btn-primary" th:href="@{/reportes}" href="/reportes">
                         <span class="material-symbols-outlined">add</span>Nueva Solicitud
                     </a>

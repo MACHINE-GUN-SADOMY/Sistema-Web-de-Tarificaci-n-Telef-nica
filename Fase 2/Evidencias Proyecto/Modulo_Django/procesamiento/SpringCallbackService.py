@@ -1,9 +1,14 @@
+import os
 import requests
 from rest_framework.exceptions import ValidationError
 
 class SpringCallbackService:
     # la url de spring pa devolverle el estado
-    SPRING_CALLBACK_URL = "http://localhost:8081/procesamiento/callback"
+    # en Docker usar: SPRING_CALLBACK_URL=http://spring-app:8081/procesamiento/callback
+    SPRING_CALLBACK_URL = os.getenv(
+        "SPRING_CALLBACK_URL",
+        "http://localhost:8081/procesamiento/callback"
+    )
 
     # le avisamos a spring que ya esta listo el archivo
     def notificarSolicitudLista(self, idSolicitud: int, rutaReporte: str):

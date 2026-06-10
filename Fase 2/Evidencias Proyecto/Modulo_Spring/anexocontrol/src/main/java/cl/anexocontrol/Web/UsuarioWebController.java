@@ -84,8 +84,7 @@ public class UsuarioWebController {
 
             usuarioService.modificarMiCuenta(idUsuario, request);
             session.setAttribute("nombreUsuario", nombreUsuario);
-            redirectAttributes.addFlashAttribute("msg", "Cuenta actualizada correctamente.");
-            return "redirect:/cuenta";
+            return "redirect:/cuenta/contrasena-cambiada";
         } catch (RuntimeException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
             return "redirect:/cuenta";

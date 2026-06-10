@@ -128,31 +128,10 @@ button, input, select { font: inherit; }
     border-bottom: 1px solid var(--border-soft);
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
     padding: 0 28px;
     z-index: 10;
 }
-.search-box {
-    position: relative;
-    width: min(520px, 45vw);
-}
-.search-box .material-symbols-outlined {
-    position: absolute;
-    left: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--muted-2);
-}
-.search-box input {
-    width: 100%;
-    height: 44px;
-    border: 1px solid var(--border-soft);
-    background: #0f1628;
-    color: var(--text);
-    padding: 0 14px 0 46px;
-    outline: none;
-}
-.search-box input:focus { border-color: rgba(0, 219, 233, 0.55); }
 .topbar-actions { display: flex; align-items: center; gap: 18px; }
 .icon-button {
     width: 34px;
@@ -303,6 +282,27 @@ button, input, select { font: inherit; }
     letter-spacing: 0.14em;
     text-transform: uppercase;
 }
+.sort-controls { display: flex; align-items: center; gap: 8px; }
+.sort-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 36px;
+    padding: 0 14px;
+    border: 1px solid var(--border);
+    color: var(--text);
+    opacity: 0.7;
+    background: transparent;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-decoration: none;
+}
+.sort-link .material-symbols-outlined { font-size: 16px; }
+.sort-link:hover { border-color: var(--cyan); color: var(--cyan); opacity: 1; }
+.sort-link.active { border-color: var(--cyan); color: var(--cyan); background: rgba(0, 219, 233, 0.08); opacity: 1; }
 .badge::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
 .badge-active, .badge-listo { color: var(--green); border-color: rgba(73, 242, 194, 0.28); background: rgba(73, 242, 194, 0.08); }
 .badge-blocked, .badge-error { color: var(--red); border-color: rgba(255, 123, 134, 0.32); background: rgba(255, 123, 134, 0.08); }
@@ -316,5 +316,4 @@ button, input, select { font: inherit; }
     .content { padding: 32px 18px 56px; }
     .page-header { flex-direction: column; align-items: flex-start; }
     .form-grid { grid-template-columns: 1fr; }
-    .search-box { width: 100%; }
 }

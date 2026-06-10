@@ -4,11 +4,13 @@
     <file url="file://$PROJECT_DIR$/funciones.sql" dialect="OracleSqlPlus" />
     <file url="file://$PROJECT_DIR$/funciones_completas.sql" dialect="Oracle" />
     <file url="file://$PROJECT_DIR$/pkg_terminado.sql" dialect="OracleSqlPlus" />
-    <file url="file://$PROJECT_DIR$/pobla_tablas_para_probar.sql" dialect="Oracle" />
+    <file url="file://$PROJECT_DIR$/pobla_tablas_para_probar.sql" dialect="OracleSqlPlus" />
     <file url="file://$PROJECT_DIR$/procedimientos.sql" dialect="Oracle" />
     <file url="file://$PROJECT_DIR$/script_create_table.sql" dialect="OracleSqlPlus" />
     <file url="file://$PROJECT_DIR$/secuencias_completa.sql" dialect="Oracle" />
     <file url="file://$PROJECT_DIR$/triggers.sql" dialect="Oracle" />
+    <file url="file://$PROJECT_DIR$/../../../../../Postgree/crea_tablas_pobla_tablas.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/../../../../../Postgree/pkg_tarificacion_postgresql.sql" dialect="PostgreSQL" />
   </component>
   <component name="SqlResolveMappings">
     <file url="file://$PROJECT_DIR$/funciones.sql" scope="{&quot;node&quot;:{  &quot;@negative&quot;:&quot;1&quot;,  &quot;group&quot;:{   &quot;@kind&quot;:&quot;root&quot;,   &quot;node&quot;:{    &quot;@negative&quot;:&quot;1&quot;   }  } }}" />

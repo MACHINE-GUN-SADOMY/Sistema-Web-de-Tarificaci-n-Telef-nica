@@ -33,7 +33,7 @@ class ViewControllerTest {
     // el controller no tiene usuario ni rol, debe redirigir al login
     @Test
     void dashboard_sinSesion_redirigeALogin() {
-        String resultado = viewController.dashboard(model, session);
+        String resultado = viewController.dashboard(model, session, null);
         assertEquals("redirect:/login", resultado);
         System.out.println("TEST sin sesion -> redirect esperado: redirect:/login, obtenido: " + resultado);
     }
@@ -52,7 +52,7 @@ class ViewControllerTest {
         when(solicitudReporteService.listarPorUsuarioConPermiso(1L, 1L, 1L))
                 .thenReturn(Collections.emptyList());
 
-        String resultado = viewController.dashboard(model, session);
+        String resultado = viewController.dashboard(model, session, null);
 
         assertEquals("admin-dashboard", resultado);
         System.out.println("TEST dashboard admin -> vista esperada: admin-dashboard, obtenida: " + resultado);
@@ -68,7 +68,7 @@ class ViewControllerTest {
         when(solicitudReporteService.listarPorUsuarioConPermiso(5L, 5L, 2L))
                 .thenReturn(Collections.emptyList());
 
-        String resultado = viewController.dashboard(model, session);
+        String resultado = viewController.dashboard(model, session, null);
 
         assertEquals("empleado-dashboard", resultado);
         System.out.println("TEST dashboard empleado -> vista esperada: empleado-dashboard, obtenida: " + resultado);
@@ -84,7 +84,7 @@ class ViewControllerTest {
         when(solicitudReporteService.listarPorUsuarioConPermiso(3L, 3L, 1L))
                 .thenReturn(Collections.emptyList());
 
-        String resultado = viewController.solicitudReportes(model, session);
+        String resultado = viewController.solicitudReportes(model, session, null);
 
         assertEquals("admin-empleado-solicitud-reportes", resultado);
         System.out.println("TEST solicitud reportes -> vista esperada: admin-empleado-solicitud-reportes, obtenida: " + resultado);

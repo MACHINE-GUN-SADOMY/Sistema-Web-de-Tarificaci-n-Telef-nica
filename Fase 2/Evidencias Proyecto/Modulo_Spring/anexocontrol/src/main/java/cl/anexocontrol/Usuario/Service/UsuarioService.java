@@ -79,6 +79,10 @@ public class UsuarioService {
         }
 
         if (request.getContrasenha() != null && !request.getContrasenha().isBlank()) {
+            // la nueva contrasenha no puede ser igual a la actual.
+            if (request.getContrasenha().equals(usuario.getContrasenha())) {
+                throw new RuntimeException("La nueva contraseña no puede ser igual a la contraseña actual.");
+            }
             usuario.setContrasenha(request.getContrasenha());
         }
 

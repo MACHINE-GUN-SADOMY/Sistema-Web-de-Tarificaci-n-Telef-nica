@@ -10,6 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Collections;
 import java.util.List;
@@ -89,7 +90,8 @@ public class ViewController {
     }
 
     @GetMapping("/dashboard")
-    public String dashboard(Model model, HttpSession session) {
+    public String dashboard(Model model, HttpSession session,
+                             @RequestParam(value = "orden", required = false) String orden) {
         Long idUsuario        = sessionLong(session, "idUsuario");
         Long idRolSolicitante = resolverRol(session);
 
@@ -99,18 +101,23 @@ public class ViewController {
         }
 
         addSessionToModel(model, session);
+
+        // orden de las listas: "asc" (mas antiguas primero) o "desc" (mas recientes primero, por defecto).
+        String ordenActual = "asc".equalsIgnoreCase(orden) ? "asc" : "desc";
+        model.addAttribute("orden", ordenActual);
+
         // el admin ve datos globales y propios; el empleado solo datos propios.
         if (Long.valueOf(1L).equals(idRolSolicitante)) {
-            cargarDashboardAdmin(model, idUsuario, idRolSolicitante);
+            cargarDashboardAdmin(model, idUsuario, idRolSolicitante, ordenActual);
             return "admin-dashboard";
         }
 
-        cargarDashboardEmpleado(model, idUsuario, idRolSolicitante);
+        cargarDashboardEmpleado(model, idUsuario, idRolSolicitante, ordenActual);
         return "empleado-dashboard";
     }
     // arma el panel admin mezclando datos del sistema y datos propios.
     // se cargan separados para que la vista no confunda metricas.
-    private void cargarDashboardAdmin(Model model, Long idUsuario, Long idRolSolicitante) {
+    private void cargarDashboardAdmin(Model model, Long idUsuario, Long idRolSolicitante, String orden) {
         try {
             List<SolicitudReporteJpa> todas =
                     solicitudReporteService.listarTodasLasSolicitudes();
@@ -126,8 +133,15 @@ public class ViewController {
                     todas.stream().filter(s -> "ERROR".equals(s.getEstadoSolicitado())).count());
 
             // se toman las primeras 10 porque la lista ya viene ordenada.
-            model.addAttribute("actividadGlobal",
-                    todas.stream().limit(10).collect(Collectors.toList()));
+            List<SolicitudReporteJpa> actividadGlobal =
+                    todas.stream().limit(10).collect(Collectors.toList());
+
+            // si piden mas antiguas primero, se invierte el orden ya calculado.
+            if ("asc".equals(orden)) {
+                Collections.reverse(actividadGlobal);
+            }
+
+            model.addAttribute("actividadGlobal", actividadGlobal);
 
         } catch (RuntimeException e) {
             model.addAttribute("totalReportesSistema", 0);
@@ -175,6 +189,11 @@ public class ViewController {
                     .limit(5)
                     .collect(Collectors.toList());
 
+            // si piden mas antiguas primero, se invierte el orden ya calculado.
+            if ("asc".equals(orden)) {
+                Collections.reverse(misUltimas);
+            }
+
             model.addAttribute("misUltimasSolicitudes", misUltimas);
 
         } catch (RuntimeException e) {
@@ -186,7 +205,7 @@ public class ViewController {
     }
     // arma el panel empleado solo con informacion del usuario autenticado.
     // no carga datos globales porque esta vista es solo de actividad propia.
-    private void cargarDashboardEmpleado(Model model, Long idUsuario, Long idRolSolicitante) {
+    private void cargarDashboardEmpleado(Model model, Long idUsuario, Long idRolSolicitante, String orden) {
         // si falta sesion, se dejan metricas propias vacias.
         if (idUsuario == null || idRolSolicitante == null) {
             model.addAttribute("totalReportes", 0);
@@ -220,6 +239,11 @@ public class ViewController {
                     .limit(10)
                     .collect(Collectors.toList());
 
+            // si piden mas antiguas primero, se invierte el orden ya calculado.
+            if ("asc".equals(orden)) {
+                Collections.reverse(ultimas);
+            }
+
             model.addAttribute("solicitudes", ultimas);
 
         } catch (RuntimeException e) {
@@ -232,7 +256,8 @@ public class ViewController {
     // solicitud de reportes e historial
 
     @GetMapping("/reportes")
-    public String solicitudReportes(Model model, HttpSession session) {
+    public String solicitudReportes(Model model, HttpSession session,
+                                     @RequestParam(value = "orden", required = false) String orden) {
         addSessionToModel(model, session);
 
         Long idUsuario        = sessionLong(session, "idUsuario");
@@ -242,10 +267,21 @@ public class ViewController {
         model.addAttribute("idUsuarioSolicitante", idUsuario);
         model.addAttribute("idRolSolicitante", idRolSolicitante);
 
+        // orden del historial: "asc" (mas antiguas primero) o "desc" (mas recientes primero, por defecto).
+        String ordenActual = "asc".equalsIgnoreCase(orden) ? "asc" : "desc";
+        model.addAttribute("orden", ordenActual);
+
         if (idUsuario != null && idRolSolicitante != null) {
             try {
-                model.addAttribute("solicitudes", solicitudReporteService
-                        .listarPorUsuarioConPermiso(idUsuario, idUsuario, idRolSolicitante));
+                List<SolicitudReporteJpa> solicitudes = solicitudReporteService
+                        .listarPorUsuarioConPermiso(idUsuario, idUsuario, idRolSolicitante);
+
+                // la lista ya viene de mas nueva a mas antigua; si piden lo contrario, se invierte.
+                if ("asc".equals(ordenActual)) {
+                    Collections.reverse(solicitudes);
+                }
+
+                model.addAttribute("solicitudes", solicitudes);
             } catch (RuntimeException e) {
                 // fallback visual activo
             }
@@ -333,6 +369,13 @@ public class ViewController {
         }
 
         return "empleado-actualizar-cuenta";
+    }
+
+    // pantalla de confirmacion mostrada solo cuando el cambio de contrasenha fue exitoso.
+    @GetMapping("/cuenta/contrasena-cambiada")
+    public String contrasenaCambiada(Model model, HttpSession session) {
+        addSessionToModel(model, session);
+        return "empleado-contrasena-cambiada";
     }
     // logout
 

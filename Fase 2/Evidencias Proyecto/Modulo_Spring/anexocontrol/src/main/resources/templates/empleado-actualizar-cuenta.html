@@ -24,13 +24,20 @@
 
     <main class="main">
         <header class="topbar">
-            <div class="search-box"><span class="material-symbols-outlined">search</span><input type="text" placeholder="Buscar..."></div>
             <div class="topbar-actions"><a class="icon-button" th:href="@{/cuenta}" href="/cuenta"><span class="material-symbols-outlined">settings</span></a><div class="user-chip"><div class="user-chip-text"><span class="user-name" th:text="${usuarioActual != null ? usuarioActual.nombreUsuario : 'Admin User'}">Admin User</span><span class="user-role">Sistema</span></div><div class="avatar-placeholder"><span class="material-symbols-outlined">person</span></div></div></div>
         </header>
 
         <section class="content form-layout">
             <div class="page-header">
                 <div><p class="page-kicker">Cuenta</p><h1 class="page-title">Actualizar Cuenta</h1><p class="page-subtitle">Modifique sus datos de acceso al sistema.</p></div>
+            </div>
+
+            <!-- mensajes que vuelven desde el redirect del controller web. -->
+            <div class="info-box" th:if="${msg}" th:text="${msg}">
+                Operación realizada correctamente.
+            </div>
+            <div class="warning-box" th:if="${error}" th:text="${error}">
+                Ha ocurrido un error.
             </div>
 
             <form class="card form-card" th:action="@{/web/actualizar-cuenta/{idUsuario}(idUsuario=${idUsuario})}" action="/web/actualizar-cuenta/0" method="post">

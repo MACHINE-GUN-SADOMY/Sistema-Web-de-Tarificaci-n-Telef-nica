@@ -4,12 +4,11 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# modificacion al base dir
-ARCHIVOS_BASE_DIR = Path(
-    os.getenv(
-        "ARCHIVOS_BASE_DIR",
-        BASE_DIR.parent / "Modulo_Spring" / "anexocontrol" / "archivos"
-    )
+# directorio base para archivos de entrada y reportes
+# en Docker usar: ARCHIVOS_BASE_DIR=/app/data
+ARCHIVOS_BASE_DIR = os.getenv(
+    "ARCHIVOS_BASE_DIR",
+    os.path.join(BASE_DIR, "archivos")
 )
 
 
@@ -22,7 +21,8 @@ SECRET_KEY = 'django-insecure-joc6ru)$u1w81ewaf!q@v)%o3*@f=_zw+zeie34sxp!ry=x=8v
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# en Docker agregar el hostname del contenedor: ALLOWED_HOSTS=django-app,localhost
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
 
 # Application definition
@@ -74,9 +74,13 @@ WSGI_APPLICATION = 'anexocontrol_django.wsgi.application'
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.oracle",
-        "NAME": "localhost:1521/XEPDB1",
-        "USER": "TARIFICACION",
-        "PASSWORD": "Tarificacion123",
+        "NAME": (
+            f"{os.getenv('ORACLE_HOST', 'localhost')}"
+            f":{os.getenv('ORACLE_PORT', '1521')}"
+            f"/{os.getenv('ORACLE_SERVICE', 'XEPDB1')}"
+        ),
+        "USER": os.getenv("ORACLE_USER", "TARIFICACION"),
+        "PASSWORD": os.getenv("ORACLE_PASSWORD", "Tarificacion123"),
     }
 }
 
